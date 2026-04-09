@@ -16,6 +16,7 @@ export type LocaleEntry = {
 export const supportedLocales = [
   { code: 'zh-CN', label: '简体中文', shortLabel: 'CN' },
   { code: 'en-US', label: 'English', shortLabel: 'EN' },
+  { code: 'th-TH', label: 'ไทย', shortLabel: 'TH' },
   { code: 'ja-JP', label: '日本語', shortLabel: 'JA' },
   { code: 'ru-RU', label: 'Русский', shortLabel: 'RU' },
 ] as const satisfies readonly LocaleEntry[];

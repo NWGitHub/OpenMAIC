@@ -22,6 +22,17 @@ const log = createLogger('QuizView');
 import type { QuizQuestion } from '@/lib/types/stage';
 import { useDraftCache } from '@/lib/hooks/use-draft-cache';
 import { SpeechButton } from '@/components/audio/speech-button';
+import { useUserProfileStore } from '@/lib/store/user-profile';
+import { useStageStore } from '@/lib/store';
+import {
+  listQuizAttemptsForScene,
+  saveQuizAttempt,
+  type QuizAttemptItem,
+} from '@/lib/utils/quiz-attempt-storage';
+import {
+  listClassroomStudents,
+  type ClassroomStudent,
+} from '@/lib/utils/classroom-student-storage';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -39,6 +50,8 @@ interface QuizViewProps {
   readonly questions: QuizQuestion[];
   readonly sceneId: string;
 }
+
+const QUIZ_ACTIVE_STUDENT_KEY = 'quizActiveStudentByStage';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -84,6 +97,7 @@ async function gradeShortAnswerQuestion(
   q: QuizQuestion,
   userAnswer: string,
   language: string,
+  student: { id: string; name: string },
 ): Promise<QuestionResult> {
   const pts = q.points ?? 1;
   try {
@@ -106,6 +120,8 @@ async function gradeShortAnswerQuestion(
         points: pts,
         commentPrompt: q.commentPrompt,
         language,
+        studentId: student.id,
+        studentName: student.name,
       }),
     });
 
@@ -683,13 +699,208 @@ function ScoreBanner({
   );
 }
 
+function ScoreHistoryPanel({
+  attempts,
+  selectedStudentId,
+  onSelectStudent,
+}: {
+  attempts: QuizAttemptItem[];
+  selectedStudentId: string;
+  onSelectStudent: (studentId: string) => void;
+}) {
+  const { t } = useI18n();
+  const [range, setRange] = useState<'all' | '7d' | '30d'>('all');
+  const [latestOnly, setLatestOnly] = useState(false);
+
+  const studentOptions = useMemo(() => {
+    const seen = new Set<string>();
+    const options: Array<{ id: string; name: string }> = [];
+    for (const a of attempts) {
+      if (seen.has(a.studentId)) continue;
+      seen.add(a.studentId);
+      options.push({ id: a.studentId, name: a.studentName });
+    }
+    return options;
+  }, [attempts]);
+
+  const filtered = useMemo(() => {
+    const now = Date.now();
+    const rangeMs =
+      range === '7d'
+        ? 7 * 24 * 60 * 60 * 1000
+        : range === '30d'
+          ? 30 * 24 * 60 * 60 * 1000
+          : null;
+
+    const byStudent =
+      selectedStudentId === 'all'
+        ? attempts
+        : attempts.filter((a) => a.studentId === selectedStudentId);
+
+    const byDate =
+      rangeMs == null ? byStudent : byStudent.filter((a) => now - a.createdAt <= rangeMs);
+
+    if (!latestOnly) return byDate;
+
+    const latestMap = new Map<string, QuizAttemptItem>();
+    for (const attempt of byDate) {
+      const prev = latestMap.get(attempt.studentId);
+      if (!prev || attempt.createdAt > prev.createdAt) {
+        latestMap.set(attempt.studentId, attempt);
+      }
+    }
+
+    return Array.from(latestMap.values()).sort((a, b) => b.createdAt - a.createdAt);
+  }, [attempts, latestOnly, range, selectedStudentId]);
+
+  const summary = useMemo(() => {
+    if (filtered.length === 0) {
+      return {
+        studentsShown: 0,
+        averagePct: 0,
+        bestPct: 0,
+      };
+    }
+
+    const uniqueStudents = new Set(filtered.map((a) => a.studentId)).size;
+    const pcts = filtered.map((a) => (a.total > 0 ? (a.score / a.total) * 100 : 0));
+    const averagePct = Math.round(pcts.reduce((sum, v) => sum + v, 0) / pcts.length);
+    const bestPct = Math.round(Math.max(...pcts));
+
+    return {
+      studentsShown: uniqueStudents,
+      averagePct,
+      bestPct,
+    };
+  }, [filtered]);
+
+  if (attempts.length === 0) return null;
+
+  return (
+    <div className="rounded-2xl border border-gray-150 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-200">Score History</h4>
+        <div className="flex items-center gap-2">
+          <select
+            value={selectedStudentId}
+            onChange={(e) => onSelectStudent(e.target.value)}
+            className="text-xs px-2 py-1 rounded-md border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200"
+          >
+            <option value="all">All students</option>
+            {studentOptions.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={range}
+            onChange={(e) => setRange(e.target.value as 'all' | '7d' | '30d')}
+            className="text-xs px-2 py-1 rounded-md border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200"
+          >
+            <option value="all">All time</option>
+            <option value="7d">Last 7 days</option>
+            <option value="30d">Last 30 days</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="mb-3">
+        <label className="inline-flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={latestOnly}
+            onChange={(e) => setLatestOnly(e.target.checked)}
+            className="size-3.5 rounded border-gray-300 dark:border-gray-600"
+          />
+          Latest attempt only per student
+        </label>
+      </div>
+
+      <div className="mb-3 grid grid-cols-3 gap-2">
+        <div className="rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 px-3 py-2">
+          <p className="text-[11px] text-gray-500 dark:text-gray-400">Students shown</p>
+          <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+            {summary.studentsShown}
+          </p>
+        </div>
+        <div className="rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 px-3 py-2">
+          <p className="text-[11px] text-gray-500 dark:text-gray-400">Average score</p>
+          <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+            {summary.averagePct}%
+          </p>
+        </div>
+        <div className="rounded-lg border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 px-3 py-2">
+          <p className="text-[11px] text-gray-500 dark:text-gray-400">Best score</p>
+          <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+            {summary.bestPct}%
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        {filtered.length === 0 && (
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            No attempts match the current filters.
+          </p>
+        )}
+        {filtered.slice(0, 20).map((a) => {
+          const pct = a.total > 0 ? Math.round((a.score / a.total) * 100) : 0;
+          return (
+            <div
+              key={a.id}
+              className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700"
+            >
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-200 truncate">
+                  {a.studentName}
+                </p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">
+                  {new Date(a.createdAt).toLocaleString()} · {a.answeredCount}/{a.questionCount}{' '}
+                  {t('quiz.questionsCount')}
+                </p>
+              </div>
+              <div className="text-right shrink-0 ml-2">
+                <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                  {a.score}/{a.total}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{pct}%</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function getOrCreateQuizStudentId(): string {
+  const storageKey = 'quizStudentId';
+  const existing = localStorage.getItem(storageKey);
+  if (existing) return existing;
+  const generated =
+    typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID()
+      : `student-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  localStorage.setItem(storageKey, generated);
+  return generated;
+}
+
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 export function QuizView({ questions, sceneId }: QuizViewProps) {
   const { t, locale } = useI18n();
+  const nickname = useUserProfileStore((s) => s.nickname);
+  const stageId = useStageStore((s) => s.stage?.id ?? '');
   const [phase, setPhase] = useState<Phase>('not_started');
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [results, setResults] = useState<QuestionResult[]>([]);
+  const [studentId, setStudentId] = useState('');
+  const [classroomStudents, setClassroomStudents] = useState<ClassroomStudent[]>([]);
+  const [selectedAttemptStudentId, setSelectedAttemptStudentId] = useState('self');
+  const [attempts, setAttempts] = useState<QuizAttemptItem[]>([]);
+  const [selectedHistoryStudentId, setSelectedHistoryStudentId] = useState('all');
 
   // Draft cache for quiz answers, keyed by sceneId to isolate across classrooms
   const {
@@ -740,6 +951,71 @@ export function QuizView({ questions, sceneId }: QuizViewProps) {
     clearAnswersCache();
   }, [clearAnswersCache]);
 
+  const loadAttempts = useCallback(async () => {
+    if (!stageId || !sceneId) return;
+    const history = await listQuizAttemptsForScene(stageId, sceneId);
+    setAttempts(history);
+  }, [sceneId, stageId]);
+
+  const loadClassroomStudents = useCallback(async () => {
+    if (!stageId) return;
+    const data = await listClassroomStudents(stageId);
+    setClassroomStudents(data);
+
+    try {
+      const raw = localStorage.getItem(QUIZ_ACTIVE_STUDENT_KEY);
+      const map = raw ? (JSON.parse(raw) as Record<string, string>) : {};
+      const remembered = map[stageId];
+      if (remembered && data.some((s) => s.id === remembered)) {
+        setSelectedAttemptStudentId(remembered);
+      } else if (data.length > 0) {
+        setSelectedAttemptStudentId(data[0].id);
+      } else {
+        setSelectedAttemptStudentId('self');
+      }
+    } catch {
+      setSelectedAttemptStudentId(data.length > 0 ? data[0].id : 'self');
+    }
+  }, [stageId]);
+
+  useEffect(() => {
+    setStudentId(getOrCreateQuizStudentId());
+  }, []);
+
+  useEffect(() => {
+    void loadAttempts();
+  }, [loadAttempts]);
+
+  useEffect(() => {
+    void loadClassroomStudents();
+  }, [loadClassroomStudents]);
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const custom = event as CustomEvent<{ stageId?: string }>;
+      if (custom.detail?.stageId === stageId) {
+        void loadClassroomStudents();
+      }
+    };
+
+    window.addEventListener('classroom-students-updated', handler as EventListener);
+    return () => {
+      window.removeEventListener('classroom-students-updated', handler as EventListener);
+    };
+  }, [loadClassroomStudents, stageId]);
+
+  useEffect(() => {
+    if (!stageId) return;
+    try {
+      const raw = localStorage.getItem(QUIZ_ACTIVE_STUDENT_KEY);
+      const map = raw ? (JSON.parse(raw) as Record<string, string>) : {};
+      map[stageId] = selectedAttemptStudentId;
+      localStorage.setItem(QUIZ_ACTIVE_STUDENT_KEY, JSON.stringify(map));
+    } catch {
+      // Ignore localStorage failures
+    }
+  }, [selectedAttemptStudentId, stageId]);
+
   // When entering grading phase, grade choice questions locally + call API for short-answer
   useEffect(() => {
     if (phase !== 'grading') return;
@@ -751,9 +1027,15 @@ export function QuizView({ questions, sceneId }: QuizViewProps) {
 
       // 2. Grade short-answer questions via AI API (parallel)
       const shortAnswerQs = questions.filter(isShortAnswer);
+      const selectedClassStudent = classroomStudents.find((s) => s.id === selectedAttemptStudentId);
+      const studentName = selectedClassStudent?.name || nickname?.trim() || t('common.you');
+      const student = {
+        id: selectedClassStudent?.id || studentId || 'anonymous',
+        name: studentName,
+      };
       const aiResults = await Promise.all(
         shortAnswerQs.map((q) =>
-          gradeShortAnswerQuestion(q, (answers[q.id] as string) ?? '', locale),
+          gradeShortAnswerQuestion(q, (answers[q.id] as string) ?? '', locale, student),
         ),
       );
 
@@ -768,13 +1050,44 @@ export function QuizView({ questions, sceneId }: QuizViewProps) {
 
       setResults(ordered);
 
+      if (stageId && sceneId) {
+        try {
+          await saveQuizAttempt({
+            stageId,
+            sceneId,
+            studentId: student.id,
+            studentName: student.name,
+            score: ordered.reduce((sum, r) => sum + r.earned, 0),
+            total: questions.reduce((sum, q) => sum + (q.points ?? 1), 0),
+            answers,
+            results: ordered,
+          });
+          await loadAttempts();
+        } catch (saveErr) {
+          log.warn('[quiz-view] Failed to persist quiz attempt:', saveErr);
+        }
+      }
+
       setPhase('reviewing');
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [phase, questions, answers, locale]);
+  }, [
+    phase,
+    questions,
+    answers,
+    locale,
+    nickname,
+    sceneId,
+    stageId,
+    studentId,
+    t,
+    loadAttempts,
+    classroomStudents,
+    selectedAttemptStudentId,
+  ]);
 
   const handleRetry = useCallback(() => {
     setPhase('not_started');
@@ -838,18 +1151,33 @@ export function QuizView({ questions, sceneId }: QuizViewProps) {
                   / {questions.length}
                 </span>
               </div>
-              <button
-                onClick={handleSubmit}
-                disabled={!allAnswered}
-                className={cn(
-                  'px-4 py-1.5 rounded-lg text-xs font-medium transition-all',
-                  allAnswered
-                    ? 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-sm hover:shadow-md hover:shadow-violet-200/50 dark:hover:shadow-violet-900/50 active:scale-[0.97]'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed',
-                )}
-              >
-                {t('quiz.submitAnswers')}
-              </button>
+              <div className="flex items-center gap-2">
+                <select
+                  value={selectedAttemptStudentId}
+                  onChange={(e) => setSelectedAttemptStudentId(e.target.value)}
+                  className="text-xs px-2 py-1.5 rounded-md border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200"
+                >
+                  <option value="self">{nickname?.trim() || t('common.you')}</option>
+                  {classroomStudents.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  onClick={handleSubmit}
+                  disabled={!allAnswered}
+                  className={cn(
+                    'px-4 py-1.5 rounded-lg text-xs font-medium transition-all',
+                    allAnswered
+                      ? 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-sm hover:shadow-md hover:shadow-violet-200/50 dark:hover:shadow-violet-900/50 active:scale-[0.97]'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed',
+                  )}
+                >
+                  {t('quiz.submitAnswers')}
+                </button>
+              </div>
             </div>
 
             {/* Questions */}
@@ -955,6 +1283,11 @@ export function QuizView({ questions, sceneId }: QuizViewProps) {
             {/* Results */}
             <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
               <ScoreBanner score={earnedScore} total={totalPoints} results={results} />
+              <ScoreHistoryPanel
+                attempts={attempts}
+                selectedStudentId={selectedHistoryStudentId}
+                onSelectStudent={setSelectedHistoryStudentId}
+              />
 
               {questions.map((q, i) => {
                 const r = resultMap[q.id];

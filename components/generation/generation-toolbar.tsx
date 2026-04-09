@@ -28,8 +28,8 @@ const MAX_PDF_SIZE_BYTES = MAX_PDF_SIZE_MB * 1024 * 1024;
 
 // ─── Types ───────────────────────────────────────────────────
 export interface GenerationToolbarProps {
-  language: 'zh-CN' | 'en-US';
-  onLanguageChange: (lang: 'zh-CN' | 'en-US') => void;
+  language: 'zh-CN' | 'en-US' | 'th-TH';
+  onLanguageChange: (lang: 'zh-CN' | 'en-US' | 'th-TH') => void;
   webSearch: boolean;
   onWebSearchChange: (v: boolean) => void;
   onSettingsOpen: (section?: SettingsSection) => void;
@@ -112,6 +112,11 @@ export function GenerationToolbar({
     'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-all cursor-pointer select-none whitespace-nowrap border';
   const pillMuted = `${pillCls} border-border/50 text-muted-foreground/70 hover:text-foreground hover:bg-muted/60`;
   const pillActive = `${pillCls} border-violet-200/60 dark:border-violet-700/50 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300`;
+  const languageOptions: Array<{ value: 'zh-CN' | 'en-US' | 'th-TH'; label: string }> = [
+    { value: 'zh-CN', label: '中文' },
+    { value: 'en-US', label: 'EN' },
+    { value: 'th-TH', label: 'TH' },
+  ];
 
   return (
     <div className="flex items-center gap-1 flex-wrap">
@@ -358,18 +363,27 @@ export function GenerationToolbar({
       )}
 
       {/* ── Language pill ── */}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            onClick={() => onLanguageChange(language === 'zh-CN' ? 'en-US' : 'zh-CN')}
-            className={pillMuted}
-          >
+      <Select
+        value={language}
+        onValueChange={(value) => onLanguageChange(value as 'zh-CN' | 'en-US' | 'th-TH')}
+      >
+        <SelectTrigger
+          className={cn(pillMuted, 'h-auto w-[88px] border px-2.5 py-1')}
+          aria-label={t('toolbar.languageHint')}
+        >
+          <span className="inline-flex items-center gap-1.5">
             <Globe className="size-3.5" />
-            <span>{language === 'zh-CN' ? '中文' : 'EN'}</span>
-          </button>
-        </TooltipTrigger>
-        <TooltipContent>{t('toolbar.languageHint')}</TooltipContent>
-      </Tooltip>
+            <SelectValue />
+          </span>
+        </SelectTrigger>
+        <SelectContent>
+          {languageOptions.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
       {/* ── Separator ── */}
       <div className="w-px h-4 bg-border/60 mx-1" />

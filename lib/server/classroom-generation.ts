@@ -98,8 +98,9 @@ function createInMemoryStore(stage: Stage): StageStore {
   };
 }
 
-function normalizeLanguage(language?: string): 'zh-CN' | 'en-US' {
-  return language === 'en-US' ? 'en-US' : 'zh-CN';
+function normalizeLanguage(language?: string): 'zh-CN' | 'en-US' | 'th-TH' {
+  if (language === 'en-US' || language === 'th-TH') return language;
+  return 'zh-CN';
 }
 
 function stripCodeFences(text: string): string {

@@ -124,6 +124,8 @@ export async function deleteStageData(stageId: string): Promise<void> {
     // Delete chat sessions and playback state
     await deleteChatSessions(stageId);
     await clearPlaybackState(stageId);
+    await db.quizAttempts.where('stageId').equals(stageId).delete();
+    await db.classroomStudents.where('stageId').equals(stageId).delete();
 
     log.info(`Deleted stage: ${stageId}`);
   } catch (error) {

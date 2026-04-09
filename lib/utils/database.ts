@@ -167,6 +167,37 @@ export interface GeneratedAgentRecord {
   createdAt: number;
 }
 
+/**
+ * QuizAttempt table - persisted quiz attempt history
+ */
+export interface QuizAttemptRecord {
+  id?: number; // Auto-increment primary key
+  stageId: string;
+  sceneId: string;
+  studentId: string;
+  studentName: string;
+  score: number;
+  total: number;
+  answeredCount: number;
+  questionCount: number;
+  answers: Record<string, string | string[]>;
+  resultsJson: string; // JSON stringified QuestionResult[]
+  createdAt: number;
+}
+
+/**
+ * ClassroomStudent table - managed student roster per classroom(stage)
+ */
+export interface ClassroomStudentRecord {
+  id: string;
+  stageId: string;
+  name: string;
+  email?: string;
+  notes?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
 /** Build the compound primary key for mediaFiles: `${stageId}:${elementId}` */
 export function mediaFileKey(stageId: string, elementId: string): string {
   return `${stageId}:${elementId}`;
@@ -175,7 +206,7 @@ export function mediaFileKey(stageId: string, elementId: string): string {
 // ==================== Database Definition ====================
 
 const DATABASE_NAME = 'MAIC-Database';
-const _DATABASE_VERSION = 8;
+const _DATABASE_VERSION = 10;
 
 /**
  * MAIC Database Instance
@@ -192,6 +223,8 @@ class MAICDatabase extends Dexie {
   stageOutlines!: EntityTable<StageOutlinesRecord, 'stageId'>;
   mediaFiles!: EntityTable<MediaFileRecord, 'id'>;
   generatedAgents!: EntityTable<GeneratedAgentRecord, 'id'>;
+  quizAttempts!: EntityTable<QuizAttemptRecord, 'id'>;
+  classroomStudents!: EntityTable<ClassroomStudentRecord, 'id'>;
 
   constructor() {
     super(DATABASE_NAME);
@@ -309,6 +342,37 @@ class MAICDatabase extends Dexie {
       mediaFiles: 'id, stageId, [stageId+type]',
       generatedAgents: 'id, stageId',
     });
+
+    // Version 9: Add quizAttempts table for per-student quiz history
+    this.version(9).stores({
+      stages: 'id, updatedAt',
+      scenes: 'id, stageId, order, [stageId+order]',
+      audioFiles: 'id, createdAt',
+      imageFiles: 'id, createdAt',
+      snapshots: '++id',
+      chatSessions: 'id, stageId, [stageId+createdAt]',
+      playbackState: 'stageId',
+      stageOutlines: 'stageId',
+      mediaFiles: 'id, stageId, [stageId+type]',
+      generatedAgents: 'id, stageId',
+      quizAttempts: '++id, stageId, sceneId, studentId, [sceneId+studentId], createdAt',
+    });
+
+    // Version 10: Add classroomStudents roster table for per-class student CRUD
+    this.version(10).stores({
+      stages: 'id, updatedAt',
+      scenes: 'id, stageId, order, [stageId+order]',
+      audioFiles: 'id, createdAt',
+      imageFiles: 'id, createdAt',
+      snapshots: '++id',
+      chatSessions: 'id, stageId, [stageId+createdAt]',
+      playbackState: 'stageId',
+      stageOutlines: 'stageId',
+      mediaFiles: 'id, stageId, [stageId+type]',
+      generatedAgents: 'id, stageId',
+      quizAttempts: '++id, stageId, sceneId, studentId, [sceneId+studentId], createdAt',
+      classroomStudents: 'id, stageId, updatedAt, [stageId+updatedAt]',
+    });
   }
 }
 
@@ -405,6 +469,8 @@ export async function deleteStageWithRelatedData(stageId: string): Promise<void>
       db.stageOutlines,
       db.mediaFiles,
       db.generatedAgents,
+      db.quizAttempts,
+      db.classroomStudents,
     ],
     async () => {
       await db.stages.delete(stageId);
@@ -414,6 +480,8 @@ export async function deleteStageWithRelatedData(stageId: string): Promise<void>
       await db.stageOutlines.delete(stageId);
       await db.mediaFiles.where('stageId').equals(stageId).delete();
       await db.generatedAgents.where('stageId').equals(stageId).delete();
+      await db.quizAttempts.where('stageId').equals(stageId).delete();
+      await db.classroomStudents.where('stageId').equals(stageId).delete();
     },
   );
 }
@@ -442,5 +510,7 @@ export async function getDatabaseStats() {
     stageOutlines: await db.stageOutlines.count(),
     mediaFiles: await db.mediaFiles.count(),
     generatedAgents: await db.generatedAgents.count(),
+    quizAttempts: await db.quizAttempts.count(),
+    classroomStudents: await db.classroomStudents.count(),
   };
 }

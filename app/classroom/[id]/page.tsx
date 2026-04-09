@@ -12,6 +12,7 @@ import { useWhiteboardHistoryStore } from '@/lib/store/whiteboard-history';
 import { createLogger } from '@/lib/logger';
 import { MediaStageProvider } from '@/lib/contexts/media-stage-context';
 import { generateMediaForOutlines } from '@/lib/media/media-orchestrator';
+import { StudentManager } from '@/components/classroom/student-manager';
 
 const log = createLogger('Classroom');
 
@@ -181,6 +182,7 @@ export default function ClassroomDetailPage() {
     <ThemeProvider>
       <MediaStageProvider value={classroomId}>
         <div className="h-screen flex flex-col overflow-hidden">
+          {!loading && !error && <StudentManager stageId={classroomId} />}
           {loading ? (
             <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
               <div className="text-center text-muted-foreground">

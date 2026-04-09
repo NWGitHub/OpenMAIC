@@ -18,6 +18,8 @@ interface GradeRequest {
   points: number;
   commentPrompt?: string;
   language?: string;
+  studentId?: string;
+  studentName?: string;
 }
 
 interface GradeResponse {
@@ -28,11 +30,13 @@ interface GradeResponse {
 export async function POST(req: NextRequest) {
   let questionSnippet: string | undefined;
   let resolvedPoints: number | undefined;
+  let resolvedStudentId: string | undefined;
   try {
     const body = (await req.json()) as GradeRequest;
-    const { question, userAnswer, points, commentPrompt, language } = body;
+    const { question, userAnswer, points, commentPrompt, language, studentId, studentName } = body;
     questionSnippet = question?.substring(0, 60);
     resolvedPoints = points;
+    resolvedStudentId = studentId;
 
     if (!question || !userAnswer) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'question and userAnswer are required');
@@ -59,9 +63,11 @@ You must reply in the following JSON format only (no other content):
     const userPrompt = isZh
       ? `题目：${question}
 满分：${points}分
+    ${studentName ? `学生：${studentName}\n` : ''}
 ${commentPrompt ? `评分要点：${commentPrompt}\n` : ''}学生答案：${userAnswer}`
       : `Question: ${question}
 Full marks: ${points} points
+    ${studentName ? `Student: ${studentName}\n` : ''}
 ${commentPrompt ? `Grading guidance: ${commentPrompt}\n` : ''}Student answer: ${userAnswer}`;
 
     const result = await callLLM(
@@ -99,7 +105,7 @@ ${commentPrompt ? `Grading guidance: ${commentPrompt}\n` : ''}Student answer: ${
     return apiSuccess({ ...gradeResult });
   } catch (error) {
     log.error(
-      `Quiz grading failed [question="${questionSnippet ?? 'unknown'}...", points=${resolvedPoints ?? 'unknown'}]:`,
+      `Quiz grading failed [question="${questionSnippet ?? 'unknown'}...", points=${resolvedPoints ?? 'unknown'}, studentId=${resolvedStudentId ?? 'unknown'}]:`,
       error,
     );
     return apiError('INTERNAL_ERROR', 500, 'Failed to grade answer');
