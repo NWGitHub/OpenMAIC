@@ -5,27 +5,34 @@ import { ThemeProvider } from '@/lib/hooks/use-theme';
 import { useStageStore } from '@/lib/store';
 import { loadImageMapping } from '@/lib/utils/image-storage';
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useSceneGenerator } from '@/lib/hooks/use-scene-generator';
 import { useMediaGenerationStore } from '@/lib/store/media-generation';
 import { useWhiteboardHistoryStore } from '@/lib/store/whiteboard-history';
 import { createLogger } from '@/lib/logger';
 import { MediaStageProvider } from '@/lib/contexts/media-stage-context';
 import { generateMediaForOutlines } from '@/lib/media/media-orchestrator';
-import { StudentManager } from '@/components/classroom/student-manager';
+import { useSession } from 'next-auth/react';
 
 const log = createLogger('Classroom');
 
 export default function ClassroomDetailPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const classroomId = params?.id as string;
+  const targetSceneId = searchParams.get('scene')?.trim() || null;
+  const { data: session } = useSession();
+  const canManageStudentsFromHeader =
+    session?.user?.role === 'INSTRUCTOR' || session?.user?.role === 'ADMIN';
+  const hasPersistAttemptedRef = useRef(false);
 
   const { loadFromStorage } = useStageStore();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const generationStartedRef = useRef(false);
+  const resumeInFlightRef = useRef(false);
+  const mediaResumeTriggeredRef = useRef(false);
 
   const { generateRemaining, retrySingleOutline, stop } = useSceneGenerator({
     onComplete: () => {
@@ -46,7 +53,11 @@ export default function ClassroomDetailPage() {
             const json = await res.json();
             if (json.success && json.classroom) {
               const { stage, scenes } = json.classroom;
-              useStageStore.getState().setStage(stage);
+              const stageWithOwnership =
+                session?.user?.role === 'STUDENT'
+                  ? { ...stage, ownershipType: 'invited' as const }
+                  : stage;
+              useStageStore.getState().setStage(stageWithOwnership);
               useStageStore.setState({
                 scenes,
                 currentSceneId: scenes[0]?.id ?? null,
@@ -65,6 +76,35 @@ export default function ClassroomDetailPage() {
           }
         } catch (fetchErr) {
           log.warn('Server-side storage fetch failed:', fetchErr);
+        }
+      }
+
+      // Ensure classrooms managed by instructors/admins are persisted server-side
+      // so assigned students can load the same classroom from /api/classroom.
+      if (canManageStudentsFromHeader && !hasPersistAttemptedRef.current) {
+        hasPersistAttemptedRef.current = true;
+        try {
+          const checkRes = await fetch(`/api/classroom?id=${encodeURIComponent(classroomId)}`);
+          if (checkRes.status === 404) {
+            const state = useStageStore.getState();
+            if (state.stage && state.scenes.length > 0) {
+              const persistRes = await fetch('/api/classroom', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  stage: { ...state.stage, id: classroomId },
+                  scenes: state.scenes,
+                }),
+              });
+              if (!persistRes.ok) {
+                log.warn('Failed to persist classroom server-side:', classroomId);
+              } else {
+                log.info('Persisted classroom server-side:', classroomId);
+              }
+            }
+          }
+        } catch (persistErr) {
+          log.warn('Server-side classroom persist check failed:', persistErr);
         }
       }
 
@@ -103,14 +143,15 @@ export default function ClassroomDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [classroomId, loadFromStorage]);
+  }, [classroomId, loadFromStorage, canManageStudentsFromHeader, session?.user?.role]);
 
   useEffect(() => {
     // Reset loading state on course switch to unmount Stage during transition,
     // preventing stale data from syncing back to the new course
     setLoading(true);
     setError(null);
-    generationStartedRef.current = false;
+    resumeInFlightRef.current = false;
+    mediaResumeTriggeredRef.current = false;
 
     // Clear previous classroom's media tasks to prevent cross-classroom contamination.
     // Placeholder IDs (gen_img_1, gen_vid_1) are NOT globally unique across stages,
@@ -130,59 +171,128 @@ export default function ClassroomDetailPage() {
     };
   }, [classroomId, loadClassroom, stop]);
 
-  // Auto-resume generation for pending outlines
+  // Auto-resume generation for pending outlines until completion.
   useEffect(() => {
-    if (loading || error || generationStartedRef.current) return;
+    if (loading || error) return;
 
-    const state = useStageStore.getState();
-    const { outlines, scenes, stage } = state;
+    const tick = () => {
+      if (resumeInFlightRef.current) return;
 
-    // Check if there are pending outlines
-    const completedOrders = new Set(scenes.map((s) => s.order));
-    const hasPending = outlines.some((o) => !completedOrders.has(o.order));
+      const state = useStageStore.getState();
+      const { outlines, scenes, stage, failedOutlines } = state;
+      if (!stage || outlines.length === 0) return;
 
-    if (hasPending && stage) {
-      generationStartedRef.current = true;
+      const completedOrders = new Set(scenes.map((s) => s.order));
+      const hasPending = outlines.some((o) => !completedOrders.has(o.order));
 
-      // Load generation params from sessionStorage (stored by generation-preview before navigating)
-      const genParamsStr = sessionStorage.getItem('generationParams');
-      const params = genParamsStr ? JSON.parse(genParamsStr) : {};
+      if (hasPending) {
+        // If there are explicit failed outlines, keep paused for manual retry.
+        if (failedOutlines.length > 0) return;
 
-      // Reconstruct imageMapping from IndexedDB using pdfImages storageIds
-      const storageIds = (params.pdfImages || [])
-        .map((img: { storageId?: string }) => img.storageId)
-        .filter(Boolean);
+        resumeInFlightRef.current = true;
 
-      loadImageMapping(storageIds).then((imageMapping) => {
-        generateRemaining({
-          pdfImages: params.pdfImages,
-          imageMapping,
-          stageInfo: {
-            name: stage.name || '',
-            description: stage.description,
-            language: stage.language,
-            style: stage.style,
-          },
-          agents: params.agents,
-          userProfile: params.userProfile,
+        const genParamsStr = sessionStorage.getItem('generationParams');
+        const params = genParamsStr ? JSON.parse(genParamsStr) : {};
+
+        const storageIds = (params.pdfImages || [])
+          .map((img: { storageId?: string }) => img.storageId)
+          .filter(Boolean);
+
+        loadImageMapping(storageIds)
+          .then((imageMapping) =>
+            generateRemaining({
+              pdfImages: params.pdfImages,
+              imageMapping,
+              stageInfo: {
+                name: stage.name || '',
+                description: stage.description,
+                language: stage.language,
+                style: stage.style,
+              },
+              agents: params.agents,
+              userProfile: params.userProfile,
+            }),
+          )
+          .catch((err) => {
+            log.warn('[Classroom] Resume generation error:', err);
+          })
+          .finally(() => {
+            resumeInFlightRef.current = false;
+          });
+        return;
+      }
+
+      // All scenes are done; ensure media catch-up runs once.
+      if (!mediaResumeTriggeredRef.current) {
+        mediaResumeTriggeredRef.current = true;
+        generateMediaForOutlines(outlines, stage.id).catch((err) => {
+          log.warn('[Classroom] Media generation resume error:', err);
         });
-      });
-    } else if (outlines.length > 0 && stage) {
-      // All scenes are generated, but some media may not have finished.
-      // Resume media generation for any tasks not yet in IndexedDB.
-      // generateMediaForOutlines skips already-completed tasks automatically.
-      generationStartedRef.current = true;
-      generateMediaForOutlines(outlines, stage.id).catch((err) => {
-        log.warn('[Classroom] Media generation resume error:', err);
-      });
-    }
+      }
+    };
+
+    tick();
+    const interval = window.setInterval(tick, 2500);
+    return () => window.clearInterval(interval);
   }, [loading, error, generateRemaining]);
+
+  // If navigated with ?scene=<id>, open that scene in AI Canvas after load.
+  useEffect(() => {
+    if (loading || error || !targetSceneId) return;
+
+    let cancelled = false;
+
+    const openTargetScene = async () => {
+      let { scenes, currentSceneId, setCurrentSceneId } = useStageStore.getState();
+
+      // Freshly created scenes may exist server-side but not yet in IndexedDB cache.
+      if (!scenes.some((scene) => scene.id === targetSceneId)) {
+        try {
+          const res = await fetch(`/api/classroom?id=${encodeURIComponent(classroomId)}`);
+          if (res.ok) {
+            const json = (await res.json()) as {
+              success?: boolean;
+              classroom?: {
+                stage: Record<string, unknown>;
+                scenes: Array<{ id: string }>;
+              };
+            };
+            if (!cancelled && json.success && json.classroom) {
+              const stageWithOwnership =
+                session?.user?.role === 'STUDENT'
+                  ? { ...json.classroom.stage, ownershipType: 'invited' as const }
+                  : json.classroom.stage;
+              useStageStore.getState().setStage(stageWithOwnership as never);
+              useStageStore.setState({
+                scenes: json.classroom.scenes,
+                currentSceneId: json.classroom.scenes[0]?.id ?? null,
+              });
+              ({ scenes, currentSceneId, setCurrentSceneId } = useStageStore.getState());
+            }
+          }
+        } catch (fetchErr) {
+          log.warn('Failed to refresh classroom for target scene:', fetchErr);
+        }
+      }
+
+      if (cancelled) return;
+      if (!scenes.some((scene) => scene.id === targetSceneId)) return;
+      if (currentSceneId === targetSceneId) return;
+
+      setCurrentSceneId(targetSceneId);
+    };
+
+    void openTargetScene();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [loading, error, targetSceneId, classroomId, session?.user?.role]);
 
   return (
     <ThemeProvider>
       <MediaStageProvider value={classroomId}>
         <div className="h-screen flex flex-col overflow-hidden">
-          {!loading && !error && <StudentManager stageId={classroomId} />}
           {loading ? (
             <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
               <div className="text-center text-muted-foreground">
