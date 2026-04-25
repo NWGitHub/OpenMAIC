@@ -33,7 +33,9 @@ export function resolveModel(params: {
   const { providerId, modelId } = parseModelString(modelString);
 
   const clientBaseUrl = params.baseUrl || undefined;
-  if (clientBaseUrl && process.env.NODE_ENV === 'production') {
+  if (clientBaseUrl) {
+    // validateUrlForSSRF already returns null when ALLOW_LOCAL_NETWORKS=true,
+    // so self-hosted Ollama deployments are unaffected.
     const ssrfError = validateUrlForSSRF(clientBaseUrl);
     if (ssrfError) {
       throw new Error(ssrfError);

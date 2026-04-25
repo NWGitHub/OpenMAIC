@@ -175,15 +175,18 @@ export async function POST(
     req,
   });
 
-  return NextResponse.json({
-    totalRows: parsed.data.students.length,
-    createdCount,
-    existingCount,
-    assignedCount,
-    emailSentCount,
-    failedCount: failures.length,
-    failures,
-    passwordsToShare,
-    assignedStudents,
-  });
+  return NextResponse.json(
+    {
+      totalRows: parsed.data.students.length,
+      createdCount,
+      existingCount,
+      assignedCount,
+      emailSentCount,
+      failedCount: failures.length,
+      failures,
+      passwordsToShare,
+      assignedStudents,
+    },
+    { headers: { 'Cache-Control': 'no-store, no-cache' } },
+  );
 }

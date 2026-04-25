@@ -10,6 +10,11 @@ const DELETED_INDEX_FILE = path.join(DELETED_CLASSROOMS_DIR, 'index.json');
 const DELETED_RETENTION_DAYS = 180;
 const DELETED_RETENTION_MS = DELETED_RETENTION_DAYS * 24 * 60 * 60 * 1000;
 
+// In-process mutex for the deleted-classroom index file.
+// Concurrent soft-delete or restore operations chain onto this promise so that
+// read-modify-write sequences never interleave and lose entries.
+let _indexLock: Promise<void> = Promise.resolve();
+
 async function ensureDir(dir: string) {
   await fs.mkdir(dir, { recursive: true });
 }
@@ -32,10 +37,23 @@ export async function writeJsonFileAtomic(filePath: string, data: unknown) {
   await fs.rename(tempFilePath, filePath);
 }
 
+/**
+ * Build the base URL for server-generated classroom links.
+ *
+ * x-forwarded-host is only trusted when TRUST_PROXY=true is set in the
+ * environment (i.e. the server sits behind a trusted reverse proxy that
+ * controls those headers). Without it, a client could forge the header to
+ * inject an attacker-controlled origin into stored classroom URLs.
+ */
 export function buildRequestOrigin(req: NextRequest): string {
-  return req.headers.get('x-forwarded-host')
-    ? `${req.headers.get('x-forwarded-proto') || 'http'}://${req.headers.get('x-forwarded-host')}`
-    : req.nextUrl.origin;
+  if (process.env.TRUST_PROXY === 'true' || process.env.TRUST_PROXY === '1') {
+    const host = req.headers.get('x-forwarded-host');
+    if (host) {
+      const proto = req.headers.get('x-forwarded-proto') || 'https';
+      return `${proto}://${host}`;
+    }
+  }
+  return req.nextUrl.origin;
 }
 
 export interface PersistedClassroomData {
@@ -122,32 +140,39 @@ async function writeDeletedIndex(records: DeletedClassroomRecord[]) {
 }
 
 export async function purgeExpiredDeletedClassrooms() {
-  const now = Date.now();
-  const records = await readDeletedIndex();
-  const keep: DeletedClassroomRecord[] = [];
-  const purge: DeletedClassroomRecord[] = [];
+  let purgedCount = 0;
+  const work = async () => {
+    const now = Date.now();
+    const records = await readDeletedIndex();
+    const keep: DeletedClassroomRecord[] = [];
+    const purge: DeletedClassroomRecord[] = [];
 
-  for (const record of records) {
-    if (new Date(record.purgeAt).getTime() <= now) purge.push(record);
-    else keep.push(record);
-  }
+    for (const record of records) {
+      if (new Date(record.purgeAt).getTime() <= now) purge.push(record);
+      else keep.push(record);
+    }
 
-  for (const record of purge) {
-    const deletedPath = getDeletedClassroomFilePath(record.id);
-    try {
-      await fs.unlink(deletedPath);
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-        throw error;
+    for (const record of purge) {
+      const deletedPath = getDeletedClassroomFilePath(record.id);
+      try {
+        await fs.unlink(deletedPath);
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+          throw error;
+        }
       }
     }
-  }
 
-  if (purge.length > 0) {
-    await writeDeletedIndex(keep);
-  }
+    if (purge.length > 0) {
+      await writeDeletedIndex(keep);
+    }
 
-  return { purgedCount: purge.length };
+    purgedCount = purge.length;
+  };
+
+  _indexLock = _indexLock.then(work);
+  await _indexLock;
+  return { purgedCount };
 }
 
 export async function softDeleteClassroom(params: {
@@ -157,7 +182,6 @@ export async function softDeleteClassroom(params: {
 }) {
   await ensureDir(CLASSROOMS_DIR);
   await ensureDir(DELETED_CLASSROOMS_DIR);
-  await purgeExpiredDeletedClassrooms();
 
   const source = getClassroomFilePath(params.id);
   const destination = getDeletedClassroomFilePath(params.id);
@@ -181,9 +205,14 @@ export async function softDeleteClassroom(params: {
     purgeAt: purgeAt.toISOString(),
   };
 
-  const records = await readDeletedIndex();
-  const next = [...records.filter((r) => r.id !== params.id), record];
-  await writeDeletedIndex(next);
+  const work = async () => {
+    const records = await readDeletedIndex();
+    const next = [...records.filter((r) => r.id !== params.id), record];
+    await writeDeletedIndex(next);
+  };
+
+  _indexLock = _indexLock.then(work);
+  await _indexLock;
 
   return { deleted: true as const, record };
 }
@@ -198,24 +227,31 @@ export async function listDeletedClassrooms() {
 export async function restoreDeletedClassroom(id: string) {
   await ensureDir(CLASSROOMS_DIR);
   await ensureDir(DELETED_CLASSROOMS_DIR);
-  await purgeExpiredDeletedClassrooms();
 
-  const records = await readDeletedIndex();
-  const target = records.find((r) => r.id === id);
-  if (!target) return null;
+  let restored: DeletedClassroomRecord | null = null;
 
-  const source = getDeletedClassroomFilePath(id);
-  const destination = getClassroomFilePath(id);
+  const work = async () => {
+    const records = await readDeletedIndex();
+    const target = records.find((r) => r.id === id);
+    if (!target) return;
 
-  try {
-    await fs.rename(source, destination);
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      return null;
+    const source = getDeletedClassroomFilePath(id);
+    const destination = getClassroomFilePath(id);
+
+    try {
+      await fs.rename(source, destination);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+        return;
+      }
+      throw error;
     }
-    throw error;
-  }
 
-  await writeDeletedIndex(records.filter((r) => r.id !== id));
-  return target;
+    await writeDeletedIndex(records.filter((r) => r.id !== id));
+    restored = target;
+  };
+
+  _indexLock = _indexLock.then(work);
+  await _indexLock;
+  return restored;
 }

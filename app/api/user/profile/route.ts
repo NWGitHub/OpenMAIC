@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import type { NextRequest } from 'next/server';
+import { validatePassword } from '@/lib/utils/password-policy';
 
 const profileSchema = z.object({
   bio: z.string().max(500).optional(),
@@ -13,10 +14,7 @@ const profileSchema = z.object({
 
 const passwordSchema = z.object({
   currentPassword: z.string(),
-  newPassword: z
-    .string()
-    .min(10)
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_\-#])/),
+  newPassword: z.string().min(1),
 });
 
 /** GET /api/user/profile */
@@ -50,6 +48,9 @@ export async function PATCH(req: NextRequest) {
     }
     const valid = await bcrypt.compare(parsed.data.currentPassword, user.hashedPassword);
     if (!valid) return NextResponse.json({ error: 'Current password is incorrect' }, { status: 400 });
+
+    const passwordError = await validatePassword(parsed.data.newPassword);
+    if (passwordError) return NextResponse.json({ error: passwordError }, { status: 400 });
 
     const newHash = await bcrypt.hash(parsed.data.newPassword, 12);
     await prisma.user.update({ where: { id: session.user.id }, data: { hashedPassword: newHash } });

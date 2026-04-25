@@ -16,6 +16,16 @@ function createTransporter() {
   });
 }
 
+/** Escape HTML special characters to prevent injection in HTML email bodies. */
+function esc(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 /**
  * Send a welcome email to a newly created student with their temporary credentials.
  * No-ops if SMTP_HOST is not configured.
@@ -56,16 +66,16 @@ export async function sendStudentWelcomeEmail(params: {
 <!DOCTYPE html>
 <html>
 <body style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 16px;color:#111;">
-  <h2 style="margin-bottom:8px;">Welcome to ${appName}</h2>
-  <p>Hi <strong>${name}</strong>,</p>
+  <h2 style="margin-bottom:8px;">Welcome to ${esc(appName)}</h2>
+  <p>Hi <strong>${esc(name)}</strong>,</p>
   <p>An account has been created for you. Use the credentials below to sign in.</p>
   <table style="border:1px solid #e5e7eb;border-radius:8px;padding:16px;width:100%;margin:16px 0;background:#f9fafb;">
-    <tr><td style="color:#6b7280;padding:4px 0;width:120px;">Sign-in URL</td><td><a href="${signInUrl}" style="color:#7c3aed;">${signInUrl}</a></td></tr>
-    <tr><td style="color:#6b7280;padding:4px 0;">Email</td><td>${to}</td></tr>
-    <tr><td style="color:#6b7280;padding:4px 0;">Temporary password</td><td style="font-family:monospace;font-size:15px;font-weight:600;">${temporaryPassword}</td></tr>
+    <tr><td style="color:#6b7280;padding:4px 0;width:120px;">Sign-in URL</td><td><a href="${esc(signInUrl)}" style="color:#7c3aed;">${esc(signInUrl)}</a></td></tr>
+    <tr><td style="color:#6b7280;padding:4px 0;">Email</td><td>${esc(to)}</td></tr>
+    <tr><td style="color:#6b7280;padding:4px 0;">Temporary password</td><td style="font-family:monospace;font-size:15px;font-weight:600;">${esc(temporaryPassword)}</td></tr>
   </table>
   <p style="color:#6b7280;font-size:13px;">Please sign in and change your password as soon as possible.</p>
-  <p style="color:#6b7280;font-size:13px;margin-top:32px;">— The ${appName} Team</p>
+  <p style="color:#6b7280;font-size:13px;margin-top:32px;">— The ${esc(appName)} Team</p>
 </body>
 </html>`,
   });
@@ -110,15 +120,15 @@ export async function sendClassroomInvitationEmail(params: {
 <html>
 <body style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 16px;color:#111;">
   <h2 style="margin-bottom:8px;">Classroom Invitation</h2>
-  <p>Hi <strong>${name}</strong>,</p>
-  <p>You have been invited to access classroom <strong>${classroomId}</strong> on ${appName}.</p>
+  <p>Hi <strong>${esc(name)}</strong>,</p>
+  <p>You have been invited to access classroom <strong>${esc(classroomId)}</strong> on ${esc(appName)}.</p>
   <table style="border:1px solid #e5e7eb;border-radius:8px;padding:16px;width:100%;margin:16px 0;background:#f9fafb;">
-    <tr><td style="color:#6b7280;padding:4px 0;width:120px;">Sign-in URL</td><td><a href="${signInUrl}" style="color:#7c3aed;">${signInUrl}</a></td></tr>
-    <tr><td style="color:#6b7280;padding:4px 0;">Email</td><td>${to}</td></tr>
-    <tr><td style="color:#6b7280;padding:4px 0;">Classroom</td><td>${classroomId}</td></tr>
+    <tr><td style="color:#6b7280;padding:4px 0;width:120px;">Sign-in URL</td><td><a href="${esc(signInUrl)}" style="color:#7c3aed;">${esc(signInUrl)}</a></td></tr>
+    <tr><td style="color:#6b7280;padding:4px 0;">Email</td><td>${esc(to)}</td></tr>
+    <tr><td style="color:#6b7280;padding:4px 0;">Classroom</td><td>${esc(classroomId)}</td></tr>
   </table>
   <p style="color:#6b7280;font-size:13px;">Sign in with your existing account to open the classroom.</p>
-  <p style="color:#6b7280;font-size:13px;margin-top:32px;">— The ${appName} Team</p>
+  <p style="color:#6b7280;font-size:13px;margin-top:32px;">— The ${esc(appName)} Team</p>
 </body>
 </html>`,
   });

@@ -4,14 +4,13 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import type { NextRequest } from 'next/server';
-
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_\-#])/;
+import { validatePassword } from '@/lib/utils/password-policy';
 
 const createUserSchema = z.object({
   name: z.string().min(1),
   email: z.string().email(),
   studentId: z.string().trim().min(1).max(50).optional().or(z.literal('')),
-  password: z.string().min(10).regex(PASSWORD_REGEX),
+  password: z.string().min(1),
   role: z.enum(['ADMIN', 'INSTRUCTOR', 'STUDENT']).default('STUDENT'),
   isActive: z.boolean().default(true),
 });
@@ -78,6 +77,12 @@ export async function POST(req: NextRequest) {
   }
 
   const { name, email, studentId, password, role, isActive } = parsed.data;
+
+  const passwordError = await validatePassword(password);
+  if (passwordError) {
+    return NextResponse.json({ error: passwordError }, { status: 400 });
+  }
+
   const hashedPassword = await bcrypt.hash(password, 12);
 
   try {

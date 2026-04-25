@@ -5,6 +5,7 @@ import GoogleProvider from 'next-auth/providers/google';
 import GitHubProvider from 'next-auth/providers/github';
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/auth/prisma';
+import { getSystemSettings } from '@/lib/server/system-settings';
 import type { Role } from '@prisma/client';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -28,12 +29,38 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const user = await prisma.user.findUnique({ where: { email } });
         if (!user || !user.hashedPassword || !user.isActive) return null;
 
-        const valid = await bcrypt.compare(String(credentials.password), user.hashedPassword);
-        if (!valid) return null;
+        // Enforce account lockout from system settings
+        const settings = await getSystemSettings();
+        const now = new Date();
+        if (user.lockedUntil && user.lockedUntil > now) {
+          // Account locked — return null without leaking the reason
+          return null;
+        }
 
+        const valid = await bcrypt.compare(String(credentials.password), user.hashedPassword);
+        if (!valid) {
+          const newAttempts = user.failedLoginAttempts + 1;
+          const shouldLock = newAttempts >= settings.maxFailedLoginAttempts;
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              failedLoginAttempts: newAttempts,
+              lockedUntil: shouldLock
+                ? new Date(now.getTime() + settings.accountLockoutMinutes * 60_000)
+                : null,
+            },
+          });
+          return null;
+        }
+
+        // Successful login — reset lockout counters
         await prisma.user.update({
           where: { id: user.id },
-          data: { lastLoginAt: new Date() },
+          data: {
+            failedLoginAttempts: 0,
+            lockedUntil: null,
+            lastLoginAt: now,
+          },
         });
 
         return { id: user.id, email: user.email, name: user.name, role: user.role };
@@ -61,8 +88,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.id = user.id;
         token.role = (user as { role?: Role }).role ?? 'STUDENT';
+        // Set session expiry from system settings
+        try {
+          const settings = await getSystemSettings();
+          token.exp = Math.floor(Date.now() / 1000) + settings.sessionTimeoutMinutes * 60;
+        } catch {
+          // Keep NextAuth default expiry if settings unavailable
+        }
       }
-      // Refresh role on every request in case admin changed it
+      // Refresh role/isActive/consent on every request in case admin changed it
       if (token.id) {
         try {
           const dbUser = await prisma.user.findUnique({
@@ -75,7 +109,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             token.consentGiven = dbUser.consentGiven;
           }
         } catch (error) {
-          // Keep the existing token payload so /api/auth/session does not fail hard.
           console.error('[auth][jwt] Failed to refresh token fields from DB:', error);
         }
       }
@@ -91,36 +124,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
     async signIn({ account }) {
-      // OAuth users get STUDENT role by default; admin can promote them later
-      if (account?.provider !== 'credentials') {
-        return true;
+      // Enforce credentials-only block when enforceOAuthforNewUsers is enabled
+      if (account?.provider === 'credentials') {
+        try {
+          const settings = await getSystemSettings();
+          if (settings.enforceOAuthforNewUsers) return false;
+        } catch {
+          // Settings unavailable — allow credentials as safe fallback
+        }
       }
       return true;
     },
-    async redirect({ url, baseUrl, token }) {
-      // If a specific callbackUrl was requested (not just root), honour it.
-      // Otherwise route by role: ADMIN → /admin, INSTRUCTOR → /instructor.
-      const isRootOrBase =
-        url === baseUrl ||
-        url === `${baseUrl}/` ||
-        url === '/' ||
-        url === '';
-      if (!isRootOrBase) {
-        // Allow relative URLs and same-origin absolute URLs.
-        if (url.startsWith('/')) return url;
-        if (url.startsWith(baseUrl)) return url;
-        return baseUrl;
-      }
-      // Root destination — route by role from the JWT token.
-      const role = (token as { role?: string } | undefined)?.role;
-      if (role === 'ADMIN') return `${baseUrl}/admin`;
-      if (role === 'INSTRUCTOR') return `${baseUrl}/instructor`;
+    async redirect({ url, baseUrl }) {
+      // Allow relative URLs and same-origin absolute URLs; reject off-origin redirects.
+      if (url.startsWith('/')) return url;
+      if (url.startsWith(baseUrl)) return url;
       return baseUrl;
     },
   },
   events: {
     async createUser({ user }) {
-      // Assign default STUDENT role and update lastLoginAt for OAuth sign-upp
       await prisma.user.update({
         where: { id: user.id },
         data: { lastLoginAt: new Date() },

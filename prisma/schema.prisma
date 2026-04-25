@@ -78,6 +78,10 @@ model User {
   consentAt    DateTime? @map("consent_at")
   consentIp    String?   @map("consent_ip")
 
+  // Login security
+  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime? @map("locked_until")
+
   // Audit fields
   lastLoginAt DateTime? @map("last_login_at")
   createdAt   DateTime  @default(now()) @map("created_at")

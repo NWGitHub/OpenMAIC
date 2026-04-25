@@ -18,6 +18,7 @@ import {
   readClassroom,
   softDeleteClassroom,
 } from '@/lib/server/classroom-storage';
+import { SUPPORTED_LOCALES, type SupportedLocale } from '@/lib/constants/locales';
 import { createLogger } from '@/lib/logger';
 
 const log = createLogger('Classroom API');
@@ -253,8 +254,12 @@ export async function PATCH(request: NextRequest) {
       return apiError(API_ERROR_CODES.INVALID_REQUEST, 400, 'title cannot be empty');
     }
 
-    if (nextLanguage && nextLanguage !== 'en' && nextLanguage !== 'zh-CN' && nextLanguage !== 'th-TH') {
-      return apiError(API_ERROR_CODES.INVALID_REQUEST, 400, 'language must be en, zh-CN, or th-TH');
+    if (nextLanguage && !SUPPORTED_LOCALES.includes(nextLanguage as SupportedLocale)) {
+      return apiError(
+        API_ERROR_CODES.INVALID_REQUEST,
+        400,
+        `language must be one of: ${SUPPORTED_LOCALES.join(', ')}`,
+      );
     }
 
     const updated = {

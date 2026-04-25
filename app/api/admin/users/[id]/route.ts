@@ -4,14 +4,13 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import type { NextRequest } from 'next/server';
-
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_\-#])/;
+import { validatePassword } from '@/lib/utils/password-policy';
 
 const patchUserSchema = z.object({
   name: z.string().min(1).optional(),
   email: z.string().email().optional(),
   studentId: z.string().trim().min(1).max(50).optional().or(z.literal('')),
-  password: z.string().min(10).regex(PASSWORD_REGEX).optional().or(z.literal('')),
+  password: z.string().min(1).optional().or(z.literal('')),
   role: z.enum(['ADMIN', 'INSTRUCTOR', 'STUDENT']).optional(),
   isActive: z.boolean().optional(),
 });
@@ -56,7 +55,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (rest.role && rest.role !== 'STUDENT' && !('studentId' in rest)) {
     updateData.studentId = null;
   }
-  if (password) updateData.hashedPassword = await bcrypt.hash(password, 12);
+  if (password) {
+    const passwordError = await validatePassword(password);
+    if (passwordError) {
+      return NextResponse.json({ error: passwordError }, { status: 400 });
+    }
+    updateData.hashedPassword = await bcrypt.hash(password, 12);
+  }
 
   try {
     const user = await prisma.user.update({
