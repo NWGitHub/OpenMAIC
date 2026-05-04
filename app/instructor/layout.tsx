@@ -24,7 +24,9 @@ export default async function InstructorLayout({ children }: { children: React.R
                 <GraduationCap className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-slate-900 dark:text-white font-semibold text-sm leading-tight">OpenMAIC</p>
+                <p className="font-semibold text-sm leading-tight">
+                  <span className="bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">MU-</span><span className="text-slate-900 dark:text-white">OpenMAIC</span>
+                </p>
                 <p className="text-slate-500 dark:text-slate-400 text-xs"><I18nText k="instructorNav.panel" fallback="Instructor Panel" /></p>
               </div>
             </div>
@@ -45,7 +47,8 @@ export default async function InstructorLayout({ children }: { children: React.R
               <form
                 action={async () => {
                   'use server';
-                  await signOut({ redirectTo: '/' });
+                  await signOut({ redirect: false });
+                  redirect('/');
                 }}
               >
                 <button

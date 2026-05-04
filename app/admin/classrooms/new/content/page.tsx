@@ -36,12 +36,12 @@ export default function ClassroomWizardContentPage() {
       <ValidationSummary errors={errors} />
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="sourceType" className="text-slate-200">Content source</Label>
+          <Label htmlFor="sourceType" className="text-slate-700 dark:text-slate-200">Content source</Label>
           <select
             id="sourceType"
             value={draft.sourceType}
             onChange={(e) => setDraft({ sourceType: e.target.value as 'blank' | 'template' | 'import' })}
-            className="h-9 w-full rounded-md border border-white/10 bg-black/20 px-3 text-sm text-white outline-none"
+            className="h-9 w-full rounded-md border border-slate-300 dark:border-white/10 bg-white dark:bg-black/20 px-3 text-sm text-slate-900 dark:text-white outline-none"
           >
             <option value="blank">Blank classroom</option>
             <option value="template">Template</option>
@@ -50,13 +50,13 @@ export default function ClassroomWizardContentPage() {
         </div>
         {draft.sourceType === 'template' && (
           <div className="space-y-1.5">
-            <Label htmlFor="templateId" className="text-slate-200">Template ID</Label>
+            <Label htmlFor="templateId" className="text-slate-700 dark:text-slate-200">Template ID</Label>
             <Input
               id="templateId"
               value={draft.templateId}
               onChange={(e) => setDraft({ templateId: e.target.value })}
               placeholder="template-english-101"
-              className="border-white/10 bg-black/20 text-white"
+              className="border-slate-300 dark:border-white/10 bg-white dark:bg-black/20 text-slate-900 dark:text-white"
             />
           </div>
         )}

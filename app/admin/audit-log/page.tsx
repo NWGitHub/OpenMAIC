@@ -332,19 +332,19 @@ export default async function AuditLogPage({ searchParams }: AuditLogPageProps) 
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100 dark:border-white/5">
-                {[
-                  <I18nText key="time" k="auditLog.columns.time" fallback="Time" />,
-                  <I18nText key="actor" k="auditLog.columns.actor" fallback="Actor" />,
-                  <I18nText key="action" k="auditLog.columns.action" fallback="Action" />,
-                  <I18nText key="resource" k="auditLog.columns.resource" fallback="Resource" />,
-                  <I18nText key="target" k="auditLog.columns.target" fallback="Target" />,
-                  <I18nText key="ip" k="auditLog.columns.ip" fallback="IP" />,
-                ].map((h) => (
+                {([
+                  ['time', 'auditLog.columns.time', 'Time'],
+                  ['actor', 'auditLog.columns.actor', 'Actor'],
+                  ['action', 'auditLog.columns.action', 'Action'],
+                  ['resource', 'auditLog.columns.resource', 'Resource'],
+                  ['target', 'auditLog.columns.target', 'Target'],
+                  ['ip', 'auditLog.columns.ip', 'IP'],
+                ] as const).map(([id, k, fallback]) => (
                   <th
-                    key={h}
+                    key={id}
                     className="px-4 py-3 text-left text-slate-600 dark:text-slate-400 font-medium text-xs uppercase tracking-wider"
                   >
-                    {h}
+                    <I18nText k={k} fallback={fallback} />
                   </th>
                 ))}
               </tr>

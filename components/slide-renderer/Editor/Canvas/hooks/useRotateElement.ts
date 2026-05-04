@@ -48,7 +48,7 @@ export function useRotateElement(
       >,
     ) => {
       const native = e.nativeEvent;
-      const isTouchEvent = native instanceof TouchEvent;
+      const isTouchEvent = typeof TouchEvent !== 'undefined' && native instanceof TouchEvent;
       if (isTouchEvent && !native.changedTouches?.length) return;
 
       let isMouseDown = true;

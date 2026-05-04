@@ -15,7 +15,7 @@ export default async function AdminUserActivityPage({ params }: { params: Promis
 
   return (
     <section className="rounded-xl border border-white/10 bg-white/5 p-5">
-      <h1 className="mb-4 text-xl font-semibold text-white">User Activity</h1>
+      <h1 className="mb-4 text-xl font-semibold text-slate-900 dark:text-white">User Activity</h1>
       {logs.length === 0 ? (
         <p className="text-sm text-slate-500">No activity found.</p>
       ) : (

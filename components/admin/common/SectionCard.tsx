@@ -9,11 +9,11 @@ interface SectionCardProps {
 
 export function SectionCard({ title, description, className, children }: SectionCardProps) {
   return (
-    <section className={cn('rounded-xl border border-white/10 bg-white/5 p-4', className)}>
+    <section className={cn('rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-4', className)}>
       {(title || description) && (
         <div className="mb-4">
-          {title && <h2 className="text-base font-semibold text-white">{title}</h2>}
-          {description && <p className="mt-1 text-sm text-slate-400">{description}</p>}
+          {title && <h2 className="text-base font-semibold text-slate-900 dark:text-white">{title}</h2>}
+          {description && <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{description}</p>}
         </div>
       )}
       {children}

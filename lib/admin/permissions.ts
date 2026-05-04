@@ -83,6 +83,7 @@ export const DEFAULT_BUILT_IN_ROLES = {
       'view_own_classrooms',
       'create_own_classrooms',
       'edit_own_classrooms',
+      'delete_own_classrooms',
       'create_students_own_classrooms',
       'view_audit_logs',
       'view_prompts',
@@ -90,8 +91,15 @@ export const DEFAULT_BUILT_IN_ROLES = {
   },
   STUDENT: {
     displayName: 'Student',
-    description: 'Access to assigned classrooms',
-    permissions: ['view_invited_classrooms', 'join_invited_classrooms'],
+    description: 'Access to assigned classrooms and own created classrooms',
+    permissions: [
+      'view_invited_classrooms',
+      'join_invited_classrooms',
+      'view_own_classrooms',
+      'create_own_classrooms',
+      'edit_own_classrooms',
+      'delete_own_classrooms',
+    ],
   },
 } as const;
 

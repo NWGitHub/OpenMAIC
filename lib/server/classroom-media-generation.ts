@@ -1,14 +1,18 @@
 /**
  * Server-side media and TTS generation for classrooms.
  *
- * Generates image/video files and TTS audio for a classroom,
- * writes them to disk, and returns serving URL mappings.
+ * Generated files are written through the ObjectStore abstraction so they land
+ * on the local filesystem in development and in S3 / R2 / MinIO on cloud
+ * deployments.  Set STORAGE_BACKEND=s3 and the S3_* variables to switch.
+ *
+ * Object-store key layout for classroom media:
+ *   classrooms/{classroomId}/media/{elementId}.{ext}   (images / videos)
+ *   classrooms/{classroomId}/audio/tts_{actionId}.{fmt} (TTS audio)
  */
 
-import { promises as fs } from 'fs';
 import path from 'path';
 import { createLogger } from '@/lib/logger';
-import { CLASSROOMS_DIR } from '@/lib/server/classroom-storage';
+import { getObjectStore } from '@/lib/storage/object-store';
 import { generateImage } from '@/lib/media/image-providers';
 import { generateVideo, normalizeVideoOptions } from '@/lib/media/video-providers';
 import { generateTTS } from '@/lib/audio/tts-providers';
@@ -41,10 +45,6 @@ const log = createLogger('ClassroomMedia');
 // Helpers
 // ---------------------------------------------------------------------------
 
-async function ensureDir(dir: string) {
-  await fs.mkdir(dir, { recursive: true });
-}
-
 const DOWNLOAD_TIMEOUT_MS = 120_000; // 2 minutes
 const DOWNLOAD_MAX_SIZE = 100 * 1024 * 1024; // 100 MB
 
@@ -58,9 +58,32 @@ async function downloadToBuffer(url: string): Promise<Buffer> {
   return Buffer.from(await resp.arrayBuffer());
 }
 
-function mediaServingUrl(baseUrl: string, classroomId: string, subPath: string): string {
-  return `${baseUrl}/api/classroom-media/${classroomId}/${subPath}`;
+/**
+ * Build the serving URL for a generated media/audio file.
+ *
+ * - Local backend  → `/api/classroom-media/{classroomId}/{subPath}`
+ * - S3 public URL  → `${S3_PUBLIC_URL}/classrooms/{classroomId}/{subPath}`
+ * - S3 private     → `/api/classroom-media/{classroomId}/{subPath}` (route redirects to pre-signed URL)
+ *
+ * `subPath` is e.g. `media/abc123.png` or `audio/tts_xyz.mp3`.
+ */
+function mediaServingUrl(appBaseUrl: string, classroomId: string, subPath: string): string {
+  const key = `classrooms/${classroomId}/${subPath}`;
+  return getObjectStore().mediaUrl(key, appBaseUrl);
 }
+
+/** Content-type lookup for common generated file extensions. */
+const MIME: Record<string, string> = {
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  webp: 'image/webp',
+  mp4: 'video/mp4',
+  mp3: 'audio/mpeg',
+  wav: 'audio/wav',
+  ogg: 'audio/ogg',
+  aac: 'audio/aac',
+};
 
 // ---------------------------------------------------------------------------
 // Image / Video generation
@@ -71,26 +94,17 @@ export async function generateMediaForClassroom(
   classroomId: string,
   baseUrl: string,
 ): Promise<Record<string, string>> {
-  const mediaDir = path.join(CLASSROOMS_DIR, classroomId, 'media');
-  await ensureDir(mediaDir);
-
-  // Collect all media generation requests from outlines
   const requests = outlines.flatMap((o) => o.mediaGenerations ?? []);
   if (requests.length === 0) return {};
 
-  // Resolve providers
   const imageProviderIds = Object.keys(getServerImageProviders());
   const videoProviderIds = Object.keys(getServerVideoProviders());
 
   const mediaMap: Record<string, string> = {};
-
-  // Separate image and video requests, generate each type sequentially
-  // but run the two types in parallel (providers often have limited concurrency).
-  const imageRequests = requests.filter((r) => r.type === 'image' && imageProviderIds.length > 0);
-  const videoRequests = requests.filter((r) => r.type === 'video' && videoProviderIds.length > 0);
+  const store = getObjectStore();
 
   const generateImages = async () => {
-    for (const req of imageRequests) {
+    for (const req of requests.filter((r) => r.type === 'image' && imageProviderIds.length > 0)) {
       try {
         const providerId = imageProviderIds[0] as ImageProviderId;
         const apiKey = resolveImageApiKey(providerId);
@@ -98,8 +112,7 @@ export async function generateMediaForClassroom(
           log.warn(`No API key for image provider "${providerId}", skipping ${req.elementId}`);
           continue;
         }
-        const providerConfig = IMAGE_PROVIDERS[providerId];
-        const model = providerConfig?.models?.[0]?.id;
+        const model = IMAGE_PROVIDERS[providerId]?.models?.[0]?.id;
 
         const result = await generateImage(
           { providerId, apiKey, baseUrl: resolveImageBaseUrl(providerId), model },
@@ -121,7 +134,9 @@ export async function generateMediaForClassroom(
         }
 
         const filename = `${req.elementId}.${ext}`;
-        await fs.writeFile(path.join(mediaDir, filename), buf);
+        const key = `classrooms/${classroomId}/media/${filename}`;
+        await store.put(key, buf, MIME[ext] ?? 'image/png');
+
         mediaMap[req.elementId] = mediaServingUrl(baseUrl, classroomId, `media/${filename}`);
         log.info(`Generated image: ${filename}`);
       } catch (err) {
@@ -131,7 +146,7 @@ export async function generateMediaForClassroom(
   };
 
   const generateVideos = async () => {
-    for (const req of videoRequests) {
+    for (const req of requests.filter((r) => r.type === 'video' && videoProviderIds.length > 0)) {
       try {
         const providerId = videoProviderIds[0] as VideoProviderId;
         const apiKey = resolveVideoApiKey(providerId);
@@ -139,8 +154,7 @@ export async function generateMediaForClassroom(
           log.warn(`No API key for video provider "${providerId}", skipping ${req.elementId}`);
           continue;
         }
-        const providerConfig = VIDEO_PROVIDERS[providerId];
-        const model = providerConfig?.models?.[0]?.id;
+        const model = VIDEO_PROVIDERS[providerId]?.models?.[0]?.id;
 
         const normalized = normalizeVideoOptions(providerId, {
           prompt: req.prompt,
@@ -154,7 +168,9 @@ export async function generateMediaForClassroom(
 
         const buf = await downloadToBuffer(result.url);
         const filename = `${req.elementId}.mp4`;
-        await fs.writeFile(path.join(mediaDir, filename), buf);
+        const key = `classrooms/${classroomId}/media/${filename}`;
+        await store.put(key, buf, 'video/mp4');
+
         mediaMap[req.elementId] = mediaServingUrl(baseUrl, classroomId, `media/${filename}`);
         log.info(`Generated video: ${filename}`);
       } catch (err) {
@@ -164,7 +180,6 @@ export async function generateMediaForClassroom(
   };
 
   await Promise.all([generateImages(), generateVideos()]);
-
   return mediaMap;
 }
 
@@ -206,10 +221,6 @@ export async function generateTTSForClassroom(
   classroomId: string,
   baseUrl: string,
 ): Promise<void> {
-  const audioDir = path.join(CLASSROOMS_DIR, classroomId, 'audio');
-  await ensureDir(audioDir);
-
-  // Resolve TTS provider (exclude browser-native-tts)
   const ttsProviderIds = Object.keys(getServerTTSProviders()).filter(
     (id) => id !== 'browser-native-tts',
   );
@@ -224,15 +235,15 @@ export async function generateTTSForClassroom(
     log.warn(`No API key for TTS provider "${providerId}", skipping TTS generation`);
     return;
   }
+
   const ttsBaseUrl = resolveTTSBaseUrl(providerId) || TTS_PROVIDERS[providerId]?.defaultBaseUrl;
   const voice = DEFAULT_TTS_VOICES[providerId] || 'default';
   const format = TTS_PROVIDERS[providerId]?.supportedFormats?.[0] || 'mp3';
+  const store = getObjectStore();
 
   for (const scene of scenes) {
     if (!scene.actions) continue;
 
-    // Split long speech actions into multiple shorter ones before TTS generation,
-    // mirroring the client-side approach. Each sub-action gets its own audio file.
     scene.actions = splitLongSpeechActions(scene.actions, providerId);
 
     for (const action of scene.actions) {
@@ -254,7 +265,8 @@ export async function generateTTSForClassroom(
         );
 
         const filename = `${audioId}.${format}`;
-        await fs.writeFile(path.join(audioDir, filename), result.audio);
+        const key = `classrooms/${classroomId}/audio/${filename}`;
+        await store.put(key, Buffer.from(result.audio), MIME[format] ?? 'audio/mpeg');
 
         speechAction.audioId = audioId;
         speechAction.audioUrl = mediaServingUrl(baseUrl, classroomId, `audio/${filename}`);

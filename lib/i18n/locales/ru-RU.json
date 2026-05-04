@@ -3,7 +3,11 @@
     "you": "Вы",
     "confirm": "Подтвердить",
     "cancel": "Отмена",
-    "loading": "Загрузка..."
+    "loading": "Загрузка...",
+    "pagination": {
+      "previous": "Назад",
+      "next": "Далее"
+    }
   },
   "home": {
     "slogan": "Generative Learning in Multi-Agent Interactive Classroom",
@@ -117,7 +121,8 @@
     "confirmSwitchMessage": "В данный момент идёт обсуждение. Переключение сцены завершит текущую тему. Продолжить?",
     "generatingNextPage": "Сцена генерируется, пожалуйста подождите...",
     "fullscreen": "Полный экран",
-    "exitFullscreen": "Свернуть"
+    "exitFullscreen": "Свернуть",
+    "interactiveMode": "Интерактив"
   },
   "whiteboard": {
     "title": "Интерактивная доска",
@@ -269,7 +274,18 @@
     "delete": "Удалить",
     "rename": "Переименовать",
     "renamePlaceholder": "Введите название класса",
-    "renameFailed": "Не удалось переименовать класс"
+    "renameFailed": "Не удалось переименовать класс",
+    "enrolledClassrooms": "Записанные классы",
+    "scenesCompleted": "Завершённые сцены",
+    "newAssignments": "Новые задания",
+    "newAssignmentBanner": "Новое задание",
+    "noInvitedClassrooms": "Классы ещё не назначены. Попросите преподавателя отправить приглашение.",
+    "progress": "Прогресс",
+    "grades": "Оценки",
+    "continue": "Продолжить",
+    "start": "Начать",
+    "open": "Открыть",
+    "scenes": "сцен"
   },
   "upload": {
     "pdfSizeLimit": "Поддержка PDF до 50 МБ",
@@ -693,7 +709,6 @@
     "lang_fa": "فارسی",
     "lang_pl": "Polski",
     "lang_ro": "Română",
-    "lang_ru": "Русский",
     "lang_sr": "Српски",
     "lang_sk": "Slovenčina",
     "lang_sl": "Slovenščina",
@@ -1039,7 +1054,8 @@
       "enrollFailed": "Класс создан, но зачисление привязанных учащихся не удалось",
       "manualEnrollFailed": "Класс создан, но {{count}} учащихся, добавленных вручную, требуют дальнейших действий на вкладке «Учащиеся»",
       "created": "Класс создан!",
-      "unexpectedError": "Произошла непредвиденная ошибка"
+      "unexpectedError": "Произошла непредвиденная ошибка",
+      "backToClassroom": "Вернуться в класс"
     },
     "schedule": {
       "stepLabel": "Шаг 4 из 5",
@@ -1052,6 +1068,50 @@
       "scheduled": "По расписанию",
       "startDateLabel": "Дата начала (необязательно)",
       "endDateLabel": "Дата окончания (необязательно)"
+    }
+  },
+  "generateScenes": {
+    "title": "Создать сцены",
+    "subtitle": "Создание учебных сцен с помощью ИИ для «{{name}}»",
+    "forClassroom": "Для класса",
+    "promptLabel": "Чему должен обучать этот класс?",
+    "promptHint": "Опишите тему, цели обучения или вставьте план учебной программы.",
+    "promptPlaceholder": "Например: Введение в законы Ньютона для старшеклассников…",
+    "generating": "Генерация…",
+    "generateBtn": "Создать сцены",
+    "setupModel": "Настроить модель",
+    "tip": "Совет: нажмите ⌘ + Enter для запуска генерации"
+  },
+  "canvas": {
+    "contextMenu": {
+      "cut": "Вырезать",
+      "copy": "Копировать",
+      "paste": "Вставить",
+      "selectAll": "Выбрать всё",
+      "delete": "Удалить",
+      "lock": "Заблокировать",
+      "unlock": "Разблокировать",
+      "setLink": "Вставить ссылку",
+      "group": "Группировать",
+      "ungroup": "Разгруппировать",
+      "ruler": "Линейка",
+      "gridLines": "Сетка",
+      "gridNone": "Нет",
+      "gridSmall": "Мелкая",
+      "gridMedium": "Средняя",
+      "gridLarge": "Крупная",
+      "resetPage": "Сбросить страницу",
+      "alignHorizontal": "По горизонтали",
+      "alignVertical": "По вертикали",
+      "alignCenter": "По центру",
+      "alignLeft": "По левому краю",
+      "alignRight": "По правому краю",
+      "alignTop": "По верхнему краю",
+      "alignBottom": "По нижнему краю",
+      "bringToFront": "На передний план",
+      "bringForward": "Вперёд",
+      "sendToBack": "На задний план",
+      "sendBackward": "Назад"
     }
   },
   "media": {
@@ -1283,6 +1343,46 @@
     "created": "создан",
     "manage": "Управлять"
   },
+  "studentDashboard": {
+    "title": "Панель студента",
+    "welcomeBack": "С возвращением,",
+    "taskMenu": "Быстрые действия",
+    "taskMenuDescription": "Перейдите к основным учебным активностям.",
+    "taskDashboard": "Моя панель",
+    "taskDashboardSub": "записанных классов",
+    "taskMyClassrooms": "Мои классы",
+    "taskMyClassroomsSubNew": "{{count}} новое задание",
+    "taskMyClassroomsSubNewPlural": "{{count}} новых задания",
+    "taskMyClassroomsSubNone": "Всё актуально",
+    "taskMyProgress": "Мой прогресс",
+    "taskMyProgressSub": "из {{total}} сцен",
+    "taskSettings": "Мой профиль",
+    "taskSettingsSub": "Просмотр и редактирование профиля",
+    "backToDashboard": "Назад к панели управления",
+    "classroomsViewTitle": "Мои классы",
+    "createClassroomTitle": "Создать новый класс",
+    "createClassroomDesc": "Опишите тему обучения и позвольте ИИ создать ваш класс",
+    "invitedSectionTitle": "Зарегистрированные классы",
+    "ownedSectionTitle": "Мои созданные классы",
+    "noOwnedClassrooms": "Вы ещё не создали ни одного класса.",
+    "pageOf": "Страница {{page}} из {{total}}",
+    "progressViewTitle": "Мой прогресс",
+    "overallSummary": "Общий обзор",
+    "overallScore": "Общий балл",
+    "sceneProgressLabel": "Прогресс по сценам",
+    "quizPerformanceLabel": "Результаты тестов",
+    "noQuizResults": "Результатов тестов пока нет",
+    "loadingGrades": "Загрузка оценок...",
+    "quizResultCount": "{{count}} результат",
+    "quizResultCountPlural": "{{count}} результатов",
+    "profileViewTitle": "Мой профиль",
+    "displayPreferences": "Настройки отображения",
+    "aiNickname": "Псевдоним для ИИ",
+    "aiNicknameDesc": "Имя, отображаемое в сессиях ИИ-класса",
+    "avatarSelect": "Выберите аватар",
+    "savePreferences": "Сохранить настройки",
+    "preferencesSaved": "Настройки сохранены."
+  },
   "instructorClassrooms": {
     "title": "Классы",
     "newClassroom": "Новый класс",
@@ -1426,5 +1526,21 @@
     "total": "Итого",
     "noQuizResults": "Пока нет результатов викторин",
     "noQuizResultsDesc": "Результаты появятся здесь после завершения викторин студентами в этом классе."
+  },
+  "signIn": {
+    "title": "Войдите в аккаунт",
+    "emailLabel": "Электронная почта",
+    "passwordLabel": "Пароль",
+    "showPassword": "Показать пароль",
+    "hidePassword": "Скрыть пароль",
+    "signingIn": "Вход…",
+    "submit": "Войти",
+    "orContinueWith": "или продолжить через",
+    "pdpaNotice": "Защищено законом Таиланда PDPA. Войдя в систему, вы соглашаетесь с нашей политикой обработки данных.",
+    "errors": {
+      "CredentialsSignin": "Неверный email или пароль.",
+      "AccountDisabled": "Ваш аккаунт отключён. Свяжитесь с администратором.",
+      "Default": "Ошибка входа. Пожалуйста, попробуйте снова."
+    }
   }
 }

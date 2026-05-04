@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { ArrowUp } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { ArrowUp, Download } from 'lucide-react';
 import type { PBLChatMessage, PBLIssue } from '@/lib/pbl/types';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { MessageResponse } from '@/components/ai-elements/message';
@@ -28,6 +28,21 @@ export function ChatPanel({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const composingRef = useRef(false);
+
+  const downloadTranscript = useCallback(() => {
+    if (messages.length === 0) return;
+    const lines = messages.map((m) => {
+      const ts = new Date(m.timestamp).toLocaleString();
+      return `[${ts}] ${m.agent_name}:\n${m.message}\n`;
+    });
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pbl-transcript-${Date.now()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [messages]);
 
   // Draft cache
   const {
@@ -72,12 +87,23 @@ export function ChatPanel({
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-4 py-3 border-b">
-        <h2 className="font-semibold text-sm">{t('pbl.chat.title')}</h2>
-        {currentIssue && (
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {t('pbl.chat.currentIssue')}: {currentIssue.title}
-          </p>
+      <div className="px-4 py-3 border-b flex items-center gap-2">
+        <div className="flex-1 min-w-0">
+          <h2 className="font-semibold text-sm">{t('pbl.chat.title')}</h2>
+          {currentIssue && (
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">
+              {t('pbl.chat.currentIssue')}: {currentIssue.title}
+            </p>
+          )}
+        </div>
+        {messages.length > 0 && (
+          <button
+            onClick={downloadTranscript}
+            title="Download transcript"
+            className="shrink-0 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" />
+          </button>
         )}
       </div>
 

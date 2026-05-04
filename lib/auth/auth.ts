@@ -8,6 +8,25 @@ import { prisma } from '@/lib/auth/prisma';
 import { getSystemSettings } from '@/lib/server/system-settings';
 import type { Role } from '@prisma/client';
 
+// Cache user fields (role/isActive/consentGiven) for 30 s to avoid a DB hit
+// on every single auth() call while still reflecting admin changes promptly.
+const USER_FIELDS_CACHE = new Map<string, { role: Role; isActive: boolean; consentGiven: boolean; expiresAt: number }>();
+const USER_FIELDS_TTL = 30_000;
+
+function getCachedUserFields(id: string) {
+  const entry = USER_FIELDS_CACHE.get(id);
+  if (entry && entry.expiresAt > Date.now()) return entry;
+  return null;
+}
+
+function setCachedUserFields(id: string, fields: { role: Role; isActive: boolean; consentGiven: boolean }) {
+  USER_FIELDS_CACHE.set(id, { ...fields, expiresAt: Date.now() + USER_FIELDS_TTL });
+}
+
+export function invalidateUserFieldsCache(id: string) {
+  USER_FIELDS_CACHE.delete(id);
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: 'jwt' },
@@ -96,20 +115,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           // Keep NextAuth default expiry if settings unavailable
         }
       }
-      // Refresh role/isActive/consent on every request in case admin changed it
+      // Refresh role/isActive/consent from DB, cached for 30 s per user
       if (token.id) {
-        try {
-          const dbUser = await prisma.user.findUnique({
-            where: { id: token.id as string },
-            select: { role: true, isActive: true, consentGiven: true },
-          });
-          if (dbUser) {
-            token.role = dbUser.role;
-            token.isActive = dbUser.isActive;
-            token.consentGiven = dbUser.consentGiven;
+        const userId = token.id as string;
+        const cached = getCachedUserFields(userId);
+        if (cached) {
+          token.role = cached.role;
+          token.isActive = cached.isActive;
+          token.consentGiven = cached.consentGiven;
+        } else {
+          try {
+            const dbUser = await prisma.user.findUnique({
+              where: { id: userId },
+              select: { role: true, isActive: true, consentGiven: true },
+            });
+            if (dbUser) {
+              token.role = dbUser.role;
+              token.isActive = dbUser.isActive;
+              token.consentGiven = dbUser.consentGiven;
+              setCachedUserFields(userId, dbUser);
+            }
+          } catch (error) {
+            console.error('[auth][jwt] Failed to refresh token fields from DB:', error);
           }
-        } catch (error) {
-          console.error('[auth][jwt] Failed to refresh token fields from DB:', error);
         }
       }
       return token;

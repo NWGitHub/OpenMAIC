@@ -68,7 +68,7 @@ export default function StudentGradesPage() {
       <div className="flex items-center gap-3">
         <Link
           href={`/instructor/classrooms/${classroomId}/grades`}
-          className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors"
+          className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> {t('instructorStudentGrades.backToGradebook')}
         </Link>
@@ -76,9 +76,9 @@ export default function StudentGradesPage() {
 
       {/* Summary */}
       {totalMax > 0 && (
-        <div className="rounded-xl border border-white/10 bg-white/5 px-6 py-4">
-          <p className="text-sm text-slate-400">{t('instructorStudentGrades.totalScore')}</p>
-          <p className="mt-1 text-3xl font-bold text-white">
+        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-6 py-4">
+          <p className="text-sm text-slate-500 dark:text-slate-400">{t('instructorStudentGrades.totalScore')}</p>
+          <p className="mt-1 text-3xl font-bold text-slate-900 dark:text-white">
             {totalScore}
             <span className="text-lg text-slate-400">/{totalMax}</span>
           </p>
@@ -125,21 +125,21 @@ function QuizResultCard({
   onOverrideSuccess: () => void;
 }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+    <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 overflow-hidden">
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/4 transition-colors text-left"
+        className="w-full flex items-center justify-between px-5 py-4 hover:bg-slate-50 dark:hover:bg-white/4 transition-colors text-left"
       >
         <div>
-          <p className="font-medium text-white">{result.sceneTitle}</p>
+          <p className="font-medium text-slate-900 dark:text-white">{result.sceneTitle}</p>
           <p className="text-xs text-slate-400 mt-0.5">
             {new Date(result.gradedAt).toLocaleDateString()} &middot;{' '}
             {t('instructorStudentGrades.gradedBy')}: {result.gradedBy === 'ai' ? t('instructorStudentGrades.ai') : t('instructorStudentGrades.instructor')}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span className={`font-semibold ${result.score === result.maxScore ? 'text-emerald-400' : 'text-white'}`}>
+          <span className={`font-semibold ${result.score === result.maxScore ? 'text-emerald-400' : 'text-slate-900 dark:text-white'}`}>
             {result.score}/{result.maxScore}
           </span>
           {expanded ? (
@@ -151,7 +151,7 @@ function QuizResultCard({
       </button>
 
       {expanded && (
-        <div className="border-t border-white/10 divide-y divide-white/5">
+        <div className="border-t border-slate-200 dark:border-white/10 divide-y divide-slate-100 dark:divide-white/5">
           {result.answers.length === 0 ? (
             <p className="px-5 py-4 text-sm text-slate-500">{t('instructorStudentGrades.noAnswerDetails')}</p>
           ) : (
@@ -243,7 +243,7 @@ function AnswerRow({
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
             {t('instructorStudentGrades.question')} {index + 1}
           </p>
-          <p className="text-sm text-white whitespace-pre-wrap">{answer.answer || t('instructorStudentGrades.noAnswer')}</p>
+          <p className="text-sm text-slate-900 dark:text-white whitespace-pre-wrap">{answer.answer || t('instructorStudentGrades.noAnswer')}</p>
           {displayComment && (
             <p className="mt-1 text-xs text-slate-400 italic">{t('instructorStudentGrades.aiComment')}: {displayComment}</p>
           )}
@@ -255,12 +255,12 @@ function AnswerRow({
               {t('instructorStudentGrades.overridden')}
             </span>
           )}
-          <span className="text-sm font-medium text-white">{displayScore}</span>
+          <span className="text-sm font-medium text-slate-900 dark:text-white">{displayScore}</span>
           {!editing && (
             <button
               type="button"
               onClick={() => setEditing(true)}
-              className="rounded border border-white/10 p-1 text-slate-400 hover:text-white transition-colors"
+              className="rounded border border-slate-200 dark:border-white/10 p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
               aria-label={t('instructorStudentGrades.overrideGrade')}
             >
               <Pencil className="w-3.5 h-3.5" />
@@ -279,7 +279,7 @@ function AnswerRow({
               onChange={(e) => setOverrideScore(e.target.value)}
               min={0}
               max={maxScorePerQ}
-              className="w-20 rounded border border-white/10 bg-white/5 px-2 py-1 text-sm text-white focus:border-indigo-500 focus:outline-none"
+              className="w-20 rounded border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 px-2 py-1 text-sm text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none"
             />
             <input
               type="text"
@@ -287,7 +287,7 @@ function AnswerRow({
               onChange={(e) => setOverrideComment(e.target.value)}
               placeholder={t('instructorStudentGrades.overrideCommentPlaceholder')}
               maxLength={500}
-              className="flex-1 rounded border border-white/10 bg-white/5 px-2 py-1 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
+              className="flex-1 rounded border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 px-2 py-1 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
             />
             <button
               type="button"
@@ -302,7 +302,7 @@ function AnswerRow({
               type="button"
               disabled={saving}
               onClick={() => setEditing(false)}
-              className="rounded border border-white/10 p-1.5 text-slate-400 hover:text-white transition-colors"
+              className="rounded border border-slate-200 dark:border-white/10 p-1.5 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
               aria-label={t('instructorStudentGrades.cancel')}
             >
               <X className="w-4 h-4" />

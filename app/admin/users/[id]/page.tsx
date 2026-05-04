@@ -25,7 +25,7 @@ export default async function AdminUserOverviewPage({ params }: { params: Promis
 
   return (
     <section className="rounded-xl border border-white/10 bg-white/5 p-5">
-      <h1 className="mb-4 text-xl font-semibold text-white"><I18nText k="adminUserOverview.title" fallback="User Overview" /></h1>
+      <h1 className="mb-4 text-xl font-semibold text-slate-900 dark:text-white"><I18nText k="adminUserOverview.title" fallback="User Overview" /></h1>
       <dl className="grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
         <Row label={<I18nText k="adminUserOverview.name" fallback="Name" />} value={user.name ?? '—'} />
         <Row label={<I18nText k="adminUserOverview.email" fallback="Email" />} value={user.email} />

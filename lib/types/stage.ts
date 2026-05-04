@@ -5,7 +5,7 @@ import type { PBLProjectConfig } from '@/lib/pbl/types';
 
 export type SceneType = 'slide' | 'quiz' | 'interactive' | 'pbl';
 
-export type StageMode = 'autonomous' | 'playback';
+export type StageMode = 'autonomous' | 'playback' | 'instructor-edit';
 
 export type Whiteboard = Omit<Slide, 'theme' | 'turningMode' | 'sectionTag' | 'type'>;
 

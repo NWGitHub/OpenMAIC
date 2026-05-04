@@ -36,17 +36,17 @@ export default function UserWizardSecurityPage() {
       <ValidationSummary errors={errors} />
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="password" className="text-slate-200">Password</Label>
+          <Label htmlFor="password" className="text-slate-700 dark:text-slate-200">Password</Label>
           <Input
             id="password"
             type="password"
             value={draft.password}
             onChange={(e) => setDraft({ password: e.target.value })}
             placeholder="At least 10 chars with upper/lower/number/symbol"
-            className="border-white/10 bg-black/20 text-white"
+            className="border-slate-300 dark:border-white/10 bg-white dark:bg-black/20 text-slate-900 dark:text-white"
           />
         </div>
-        <label className="flex items-center gap-2 text-sm text-slate-200">
+        <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
           <input
             type="checkbox"
             checked={draft.isActive}

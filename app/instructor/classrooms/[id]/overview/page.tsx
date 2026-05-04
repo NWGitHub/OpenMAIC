@@ -29,7 +29,7 @@ export default async function InstructorClassroomOverviewPage({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-semibold text-white">{title}</h1>
+      <h1 className="text-xl font-semibold text-slate-900 dark:text-white">{title}</h1>
 
       {/* Stats row */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -48,7 +48,7 @@ export default async function InstructorClassroomOverviewPage({
       </div>
 
       {/* Quick actions */}
-      <section className="rounded-xl border border-white/10 bg-white/5 p-5">
+      <section className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-5">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-400">
           <I18nText k="instructorClassroomOverview.quickActions" fallback="Quick actions" />
         </h2>
@@ -61,7 +61,7 @@ export default async function InstructorClassroomOverviewPage({
       </section>
 
       {/* Scene preview */}
-      <section className="rounded-xl border border-white/10 bg-white/5 p-5">
+      <section className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-5">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-400">
           <I18nText k="instructorClassroomOverview.scenePreview" fallback="Scene preview (first 5)" />
         </h2>
@@ -72,10 +72,10 @@ export default async function InstructorClassroomOverviewPage({
             {classroom.scenes.slice(0, 5).map((scene) => (
               <li
                 key={scene.id}
-                className="flex items-center gap-3 rounded-lg border border-white/8 bg-black/20 px-3 py-2 text-sm"
+                className="flex items-center gap-3 rounded-lg border border-slate-200 dark:border-white/8 bg-white dark:bg-black/20 px-3 py-2 text-sm"
               >
                 <span className="w-6 text-xs text-center text-slate-500">{scene.order}</span>
-                <span className="flex-1 text-white">{scene.title || <I18nText k="instructorClassroomOverview.untitled" fallback="(untitled)" />}</span>
+                <span className="flex-1 text-slate-900 dark:text-white">{scene.title || <I18nText k="instructorClassroomOverview.untitled" fallback="(untitled)" />}</span>
                 <span className="rounded bg-white/8 px-2 py-0.5 text-xs text-slate-400">
                   {scene.type}
                 </span>
@@ -98,12 +98,12 @@ export default async function InstructorClassroomOverviewPage({
 
 function StatCard({ icon, label, value }: { icon: React.ReactNode; label: ReactNode; value: string }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-4 flex items-center gap-3">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/8">
+    <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-4 flex items-center gap-3">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-200 dark:bg-white/8">
         {icon}
       </div>
       <div>
-        <p className="text-sm font-semibold text-white">{value}</p>
+        <p className="text-sm font-semibold text-slate-900 dark:text-white">{value}</p>
         <p className="text-xs text-slate-400">{label}</p>
       </div>
     </div>

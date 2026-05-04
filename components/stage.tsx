@@ -663,6 +663,7 @@ export function Stage({
    * Gated scene switch — if a topic is active, show AlertDialog before switching.
    * Returns true if the switch was immediate, false if gated (dialog shown).
    */
+  const setMode = useStageStore.use.setMode();
   const gatedSceneSwitch = useCallback(
     (targetSceneId: string): boolean => {
       if (targetSceneId === currentSceneId) return false;
@@ -670,10 +671,12 @@ export function Stage({
         setPendingSceneId(targetSceneId);
         return false;
       }
+      // Exit instructor-edit mode when switching scenes
+      if (mode === 'instructor-edit') setMode('playback');
       setCurrentSceneId(targetSceneId);
       return true;
     },
-    [currentSceneId, isTopicActive, setCurrentSceneId],
+    [currentSceneId, isTopicActive, mode, setMode, setCurrentSceneId],
   );
 
   /** User confirmed scene switch via AlertDialog */
@@ -918,7 +921,7 @@ export function Stage({
   // Calculate scene viewer height (subtract Header's 80px height)
   const sceneViewerHeight = (() => {
     const headerHeight = isPresenting ? 0 : 80; // Header h-20 = 80px
-    const roundtableHeight = mode === 'playback' && !isPresenting ? 192 : 0;
+    const roundtableHeight = (mode === 'playback' || mode === 'instructor-edit') && !isPresenting ? 192 : 0;
     return `calc(100% - ${headerHeight + roundtableHeight}px)`;
   })();
 
@@ -976,7 +979,7 @@ export function Stage({
               (chatIsStreaming && (chatSessionType === 'qa' || chatSessionType === 'discussion'))
             }
             onStopDiscussion={handleStopDiscussion}
-            hideToolbar={mode === 'playback' || (isPresenting && !controlsVisible)}
+            hideToolbar={mode === 'playback' || mode === 'instructor-edit' || (isPresenting && !controlsVisible)}
             isPendingScene={isPendingScene}
             isGenerationFailed={
               isPendingScene && failedOutlines.some((f) => f.id === generatingOutlines[0]?.id)
@@ -990,7 +993,7 @@ export function Stage({
         </div>
 
         {/* Roundtable Area */}
-        {mode === 'playback' && (
+        {(mode === 'playback' || mode === 'instructor-edit') && (
           <div
             className={cn(
               'transition-opacity duration-300',
@@ -999,7 +1002,7 @@ export function Stage({
             )}
           >
             <Roundtable
-              mode={mode}
+              mode={mode === 'instructor-edit' ? 'playback' : mode}
               initialParticipants={participants}
               playbackView={playbackView}
               currentSpeech={liveSpeech}

@@ -12,6 +12,7 @@ import { useI18n } from '@/lib/hooks/use-i18n';
 interface PBLWorkspaceProps {
   readonly projectConfig: PBLProjectConfig;
   readonly userRole: string;
+  readonly sceneId: string;
   readonly onConfigUpdate: (config: PBLProjectConfig) => void;
   readonly onReset: () => void;
 }
@@ -19,6 +20,7 @@ interface PBLWorkspaceProps {
 export function PBLWorkspace({
   projectConfig,
   userRole,
+  sceneId,
   onConfigUpdate,
   onReset,
 }: PBLWorkspaceProps) {
@@ -28,6 +30,7 @@ export function PBLWorkspace({
   const { messages, isLoading, sendMessage, currentIssue } = usePBLChat({
     projectConfig,
     userRole,
+    sceneId,
     onConfigUpdate,
   });
 

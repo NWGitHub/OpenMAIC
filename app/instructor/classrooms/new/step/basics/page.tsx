@@ -43,7 +43,7 @@ export default function BasicsPage() {
     >
       <div className="space-y-6">
         <div>
-          <h2 className="text-lg font-semibold text-white">{t('classroomWizard.basics.sectionTitle')}</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('classroomWizard.basics.sectionTitle')}</h2>
           <p className="mt-1 text-sm text-slate-400">
             {t('classroomWizard.basics.sectionDesc')}
           </p>
@@ -51,7 +51,7 @@ export default function BasicsPage() {
 
         <div className="space-y-4">
           <div>
-            <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-slate-200">
+            <label htmlFor="title" className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
               {t('classroomWizard.basics.titleLabel')} <span className="text-red-400">*</span>
             </label>
             <input
@@ -61,7 +61,7 @@ export default function BasicsPage() {
               onChange={(e) => setTitle(e.target.value)}
               placeholder={t('classroomWizard.basics.titlePlaceholder')}
               maxLength={200}
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
               autoFocus
             />
             {title.trim().length === 0 && (
@@ -70,7 +70,7 @@ export default function BasicsPage() {
           </div>
 
           <div>
-            <label htmlFor="description" className="mb-1.5 block text-sm font-medium text-slate-200">
+            <label htmlFor="description" className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
               {t('classroomWizard.basics.descriptionLabel')}
             </label>
             <textarea
@@ -80,21 +80,21 @@ export default function BasicsPage() {
               placeholder={t('classroomWizard.basics.descriptionPlaceholder')}
               rows={4}
               maxLength={1000}
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none"
+              className="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none"
             />
           </div>
 
           <div>
-            <label htmlFor="language" className="mb-1.5 block text-sm font-medium text-slate-200">
+            <label htmlFor="language" className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
               {t('classroomWizard.basics.languageLabel')}
             </label>
             <select
               id="language"
               value={language}
-              onChange={(e) => setLanguage(e.target.value as 'en' | 'zh-CN' | 'th-TH')}
-              className="rounded-lg border border-white/10 bg-slate-800 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              onChange={(e) => setLanguage(e.target.value as 'en-US' | 'zh-CN' | 'th-TH')}
+              className="rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             >
-              <option value="en">{t('classroomWizard.languages.en')}</option>
+              <option value="en-US">{t('classroomWizard.languages.en')}</option>
               <option value="zh-CN">{t('classroomWizard.languages.zhCN')}</option>
               <option value="th-TH">{t('classroomWizard.languages.thTH')}</option>
             </select>

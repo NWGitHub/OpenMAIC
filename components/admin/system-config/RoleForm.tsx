@@ -91,43 +91,43 @@ export function RoleForm({ initialRole }: RoleFormProps) {
       )}
 
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-1.5">Role name (lowercase, underscores only)</label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Role name (lowercase, underscores only)</label>
         <input
           type="text"
           value={form.name}
           onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
           disabled={!!initialRole}
-          className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full px-3 py-2 rounded-lg bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
           placeholder="custom_role"
         />
         {errors.name && <p className="text-red-400 text-xs mt-1">{errors.name}</p>}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-1.5">Display name</label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Display name</label>
         <input
           type="text"
           value={form.displayName}
           onChange={(e) => setForm((f) => ({ ...f, displayName: e.target.value }))}
-          className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="w-full px-3 py-2 rounded-lg bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
           placeholder="Custom Role"
         />
         {errors.displayName && <p className="text-red-400 text-xs mt-1">{errors.displayName}</p>}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-1.5">Description</label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Description</label>
         <textarea
           value={form.description}
           onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-          className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+          className="w-full px-3 py-2 rounded-lg bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
           rows={3}
           placeholder="Optional description"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-3">Permissions</label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Permissions</label>
         <PermissionMatrix
           selectedPermissions={form.permissions}
           onChange={(perms) => setForm((f) => ({ ...f, permissions: perms }))}
@@ -148,7 +148,7 @@ export function RoleForm({ initialRole }: RoleFormProps) {
           type="button"
           variant="outline"
           onClick={() => router.push('/admin/roles')}
-          className="border-white/10 text-slate-300"
+          className="border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300"
         >
           Cancel
         </Button>

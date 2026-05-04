@@ -1,10 +1,25 @@
-import { promises as fs, createReadStream } from 'fs';
+/**
+ * Classroom media serving route.
+ *
+ * Handles GET requests for generated images, videos, and TTS audio associated
+ * with a classroom.  Authentication and access-control are enforced before any
+ * file data is returned.
+ *
+ * Local storage  → streams the file from disk.
+ * S3 storage     → issues a 307 redirect to a pre-signed S3 URL (1-hour TTL),
+ *                  OR — if S3_PUBLIC_URL is set — a permanent 301 redirect to
+ *                  the CDN/public URL.
+ */
+
+import { createReadStream } from 'fs';
+import { promises as fs } from 'fs';
 import path from 'path';
 import { NextRequest, NextResponse } from 'next/server';
 import { CLASSROOMS_DIR, isValidClassroomId } from '@/lib/server/classroom-storage';
 import { auth } from '@/lib/auth/auth';
 import { userHasClassroomAccess } from '@/lib/auth/helpers';
 import { createLogger } from '@/lib/logger';
+import { getObjectStore, LocalObjectStore, S3ObjectStore } from '@/lib/storage/object-store';
 
 const log = createLogger('ClassroomMedia');
 
@@ -33,7 +48,6 @@ export async function GET(
 
   const { classroomId, path: pathSegments } = await params;
 
-  // Validate classroomId
   if (!isValidClassroomId(classroomId)) {
     return NextResponse.json({ error: 'Invalid classroom ID' }, { status: 400 });
   }
@@ -43,23 +57,63 @@ export async function GET(
     return NextResponse.json({ error: 'Access denied' }, { status: 403 });
   }
 
-  // Validate path segments — no traversal
   const joined = pathSegments.join('/');
   if (joined.includes('..') || pathSegments.some((s) => s.includes('\0'))) {
     return NextResponse.json({ error: 'Invalid path' }, { status: 400 });
   }
 
-  // Only allow media/ and audio/ subdirectories
   const subDir = pathSegments[0];
   if (subDir !== 'media' && subDir !== 'audio') {
     return NextResponse.json({ error: 'Invalid path' }, { status: 404 });
+  }
+
+  // Object-store key for this media file
+  const objectKey = `classrooms/${classroomId}/${joined}`;
+  const store = getObjectStore();
+
+  // -------------------------------------------------------------------
+  // S3 backend — redirect to pre-signed URL or CDN
+  // -------------------------------------------------------------------
+  if (store instanceof S3ObjectStore) {
+    try {
+      const publicUrl = process.env.S3_PUBLIC_URL;
+      if (publicUrl) {
+        // Public/CDN bucket — permanent redirect (client caches it)
+        const target = `${publicUrl.replace(/\/$/, '')}/${objectKey}`;
+        return NextResponse.redirect(target, { status: 301 });
+      }
+
+      // Private bucket — generate a 1-hour pre-signed URL
+      const presigned = await store.presign(objectKey, 3600);
+      return NextResponse.redirect(presigned, { status: 307 });
+    } catch (err) {
+      log.error(`S3 presign failed [key=${objectKey}]:`, err);
+      return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+    }
+  }
+
+  // -------------------------------------------------------------------
+  // Local filesystem backend — stream the file
+  // -------------------------------------------------------------------
+  if (!(store instanceof LocalObjectStore)) {
+    // Unknown store type — fall back to generic buffer response
+    const buf = await store.get(objectKey);
+    if (!buf) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    const ext = path.extname(pathSegments[pathSegments.length - 1]).toLowerCase();
+    return new NextResponse(new Uint8Array(buf), {
+      status: 200,
+      headers: {
+        'Content-Type': MIME_TYPES[ext] || 'application/octet-stream',
+        'Content-Length': String(buf.length),
+        'Cache-Control': 'public, max-age=86400, immutable',
+      },
+    });
   }
 
   const filePath = path.join(CLASSROOMS_DIR, classroomId, ...pathSegments);
   const resolvedBase = path.resolve(CLASSROOMS_DIR, classroomId);
 
   try {
-    // Resolve symlinks and verify the real path stays within the classroom dir
     const realPath = await fs.realpath(filePath);
     if (!realPath.startsWith(resolvedBase + path.sep) && realPath !== resolvedBase) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
@@ -73,7 +127,6 @@ export async function GET(
     const ext = path.extname(realPath).toLowerCase();
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
-    // Stream the file to avoid loading large videos into memory
     const stream = createReadStream(realPath);
     const webStream = new ReadableStream({
       start(controller) {
@@ -98,10 +151,7 @@ export async function GET(
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
-    log.error(
-      `Classroom media serving failed [classroomId=${classroomId}, path=${joined}]:`,
-      error,
-    );
+    log.error(`Classroom media serving failed [classroomId=${classroomId}, path=${joined}]:`, error);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }

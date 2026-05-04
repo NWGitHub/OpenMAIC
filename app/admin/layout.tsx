@@ -65,7 +65,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               <GraduationCap className="w-4 h-4 text-white" />
             </div>
             <div>
-              <p className="text-slate-900 dark:text-white font-semibold text-sm leading-tight">MU-OpenMAIC</p>
+              <p className="font-semibold text-sm leading-tight">
+                <span className="bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">MU-</span><span className="text-slate-900 dark:text-white">OpenMAIC</span>
+              </p>
               <p className="text-slate-500 dark:text-slate-400 text-xs"><I18nText k="adminNav.panel" fallback="Admin Panel" /></p>
             </div>
           </div>

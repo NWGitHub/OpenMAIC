@@ -44,10 +44,10 @@ export function PromptPreview({ displayName, original, category }: PromptPreview
   }
 
   return (
-    <div className="space-y-4 rounded-lg border border-white/10 bg-white/5 p-4">
+    <div className="space-y-4 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-4">
       <div className="grid grid-cols-1 gap-4">
         <div>
-          <label className="text-xs uppercase tracking-wider text-slate-400">Test Variables</label>
+          <label className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">Test Variables</label>
           <div className="mt-2 space-y-2">
             {Object.entries(variables).map(([key, value]) => (
               <input
@@ -56,7 +56,7 @@ export function PromptPreview({ displayName, original, category }: PromptPreview
                 value={value}
                 onChange={(e) => setVariables((v) => ({ ...v, [key]: e.target.value }))}
                 placeholder={key}
-                className="w-full px-2 py-1 bg-white/5 border border-white/5 rounded text-xs text-slate-300 placeholder:text-slate-600"
+                className="w-full px-2 py-1 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded text-xs text-slate-700 dark:text-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-600"
               />
             ))}
           </div>
@@ -74,15 +74,15 @@ export function PromptPreview({ displayName, original, category }: PromptPreview
 
         {rendered && (
           <div>
-            <label className="text-xs uppercase tracking-wider text-slate-400">Rendered Output</label>
+            <label className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">Rendered Output</label>
             <div className="mt-2 relative">
-              <pre className="p-3 rounded-lg bg-black/50 border border-white/10 text-xs text-slate-200 overflow-auto max-h-48 whitespace-pre-wrap break-words">
+              <pre className="p-3 rounded-lg bg-slate-100 dark:bg-black/50 border border-slate-200 dark:border-white/10 text-xs text-slate-700 dark:text-slate-200 overflow-auto max-h-48 whitespace-pre-wrap break-words">
                 {rendered}
               </pre>
               <button
                 type="button"
                 onClick={copyToClipboard}
-                className="absolute top-2 right-2 p-1 rounded bg-white/10 hover:bg-white/20 text-slate-400"
+                className="absolute top-2 right-2 p-1 rounded bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-slate-500 dark:text-slate-400"
                 title="Copy to clipboard"
               >
                 <Copy className="w-3 h-3" />

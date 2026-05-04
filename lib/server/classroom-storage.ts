@@ -1,49 +1,82 @@
-import { promises as fs } from 'fs';
+/**
+ * Classroom persistence layer.
+ *
+ * All reads and writes go through the ObjectStore abstraction so the app runs
+ * identically on the local filesystem and on S3 / S3-compatible object storage
+ * (Cloudflare R2, MinIO, …).  Set STORAGE_BACKEND=s3 and the S3_* variables to
+ * switch backends — no other code change is required.
+ *
+ * Key layout:
+ *   classrooms/{id}.json
+ *   classrooms-deleted/{id}.json
+ *   classrooms-deleted/index.json
+ */
+
 import path from 'path';
 import type { NextRequest } from 'next/server';
 import type { Scene, Stage } from '@/lib/types/stage';
+import { getObjectStore, toJsonBuffer, fromJsonBuffer } from '@/lib/storage/object-store';
 
+// ---------------------------------------------------------------------------
+// Legacy local-path constants (kept for the local filesystem serving route)
+// ---------------------------------------------------------------------------
+
+/** Absolute path to the local classrooms directory.
+ *  Only meaningful when STORAGE_BACKEND=local (the default). */
 export const CLASSROOMS_DIR = path.join(process.cwd(), 'data', 'classrooms');
 export const CLASSROOM_JOBS_DIR = path.join(process.cwd(), 'data', 'classroom-jobs');
 export const DELETED_CLASSROOMS_DIR = path.join(process.cwd(), 'data', 'classrooms-deleted');
-const DELETED_INDEX_FILE = path.join(DELETED_CLASSROOMS_DIR, 'index.json');
-const DELETED_RETENTION_DAYS = 180;
-const DELETED_RETENTION_MS = DELETED_RETENTION_DAYS * 24 * 60 * 60 * 1000;
 
-// In-process mutex for the deleted-classroom index file.
-// Concurrent soft-delete or restore operations chain onto this promise so that
-// read-modify-write sequences never interleave and lose entries.
+// ---------------------------------------------------------------------------
+// Key helpers
+// ---------------------------------------------------------------------------
+
+const classroomKey = (id: string) => `classrooms/${id}.json`;
+const deletedKey = (id: string) => `classrooms-deleted/${id}.json`;
+const DELETED_INDEX_KEY = 'classrooms-deleted/index.json';
+
+// ---------------------------------------------------------------------------
+// In-process mutex for the deleted-classroom index.
+//
+// For single-instance deployments (local + S3) this prevents interleaved
+// read-modify-write sequences.  Multi-instance deployments behind a load
+// balancer should use sticky sessions or a distributed lock for the index;
+// as classroom deletion is a rare admin operation this is acceptable for now.
+// ---------------------------------------------------------------------------
+
 let _indexLock: Promise<void> = Promise.resolve();
 
-async function ensureDir(dir: string) {
-  await fs.mkdir(dir, { recursive: true });
+// ---------------------------------------------------------------------------
+// Compatibility shim: writeJsonFileAtomic
+//
+// Used by classroom-job-store.ts which still imports this helper directly.
+// Routes all writes through the ObjectStore so they work on both backends.
+// ---------------------------------------------------------------------------
+
+export async function writeJsonFileAtomic(filePath: string, data: unknown): Promise<void> {
+  // Convert the absolute local path back to an object-store key.
+  // e.g. /…/data/classrooms/abc.json  →  classrooms/abc.json
+  const dataRoot = path.join(process.cwd(), 'data');
+  const rel = path.relative(dataRoot, filePath);
+  // Normalize OS separators to forward-slashes
+  const key = rel.split(path.sep).join('/');
+  await getObjectStore().put(key, toJsonBuffer(data), 'application/json');
 }
 
-export async function ensureClassroomsDir() {
-  await ensureDir(CLASSROOMS_DIR);
-}
+// Kept for backward-compat (callers that import ensureClassroomsDir / ensureClassroomJobsDir)
+export async function ensureClassroomsDir(): Promise<void> { /* no-op with ObjectStore */ }
+export async function ensureClassroomJobsDir(): Promise<void> { /* no-op with ObjectStore */ }
 
-export async function ensureClassroomJobsDir() {
-  await ensureDir(CLASSROOM_JOBS_DIR);
-}
-
-export async function writeJsonFileAtomic(filePath: string, data: unknown) {
-  const dir = path.dirname(filePath);
-  await ensureDir(dir);
-
-  const tempFilePath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
-  const content = JSON.stringify(data, null, 2);
-  await fs.writeFile(tempFilePath, content, 'utf-8');
-  await fs.rename(tempFilePath, filePath);
-}
+// ---------------------------------------------------------------------------
+// Request-origin helper
+// ---------------------------------------------------------------------------
 
 /**
  * Build the base URL for server-generated classroom links.
  *
  * x-forwarded-host is only trusted when TRUST_PROXY=true is set in the
- * environment (i.e. the server sits behind a trusted reverse proxy that
- * controls those headers). Without it, a client could forge the header to
- * inject an attacker-controlled origin into stored classroom URLs.
+ * environment (the server sits behind a trusted reverse proxy that controls
+ * those headers).
  */
 export function buildRequestOrigin(req: NextRequest): string {
   if (process.env.TRUST_PROXY === 'true' || process.env.TRUST_PROXY === '1') {
@@ -55,6 +88,10 @@ export function buildRequestOrigin(req: NextRequest): string {
   }
   return req.nextUrl.origin;
 }
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 export interface PersistedClassroomData {
   id: string;
@@ -75,25 +112,18 @@ export function isValidClassroomId(id: string): boolean {
   return /^[a-zA-Z0-9_-]+$/.test(id);
 }
 
+// ---------------------------------------------------------------------------
+// Classroom CRUD
+// ---------------------------------------------------------------------------
+
 export async function readClassroom(id: string): Promise<PersistedClassroomData | null> {
-  const filePath = path.join(CLASSROOMS_DIR, `${id}.json`);
-  try {
-    const content = await fs.readFile(filePath, 'utf-8');
-    return JSON.parse(content) as PersistedClassroomData;
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      return null;
-    }
-    throw error;
-  }
+  const buf = await getObjectStore().get(classroomKey(id));
+  if (!buf) return null;
+  return fromJsonBuffer<PersistedClassroomData>(buf);
 }
 
 export async function persistClassroom(
-  data: {
-    id: string;
-    stage: Stage;
-    scenes: Scene[];
-  },
+  data: { id: string; stage: Stage; scenes: Scene[] },
   baseUrl: string,
 ): Promise<PersistedClassroomData & { url: string }> {
   const classroomData: PersistedClassroomData = {
@@ -103,9 +133,7 @@ export async function persistClassroom(
     createdAt: new Date().toISOString(),
   };
 
-  await ensureClassroomsDir();
-  const filePath = path.join(CLASSROOMS_DIR, `${data.id}.json`);
-  await writeJsonFileAtomic(filePath, classroomData);
+  await getObjectStore().put(classroomKey(data.id), toJsonBuffer(classroomData), 'application/json');
 
   return {
     ...classroomData,
@@ -113,34 +141,27 @@ export async function persistClassroom(
   };
 }
 
-function getClassroomFilePath(id: string) {
-  return path.join(CLASSROOMS_DIR, `${id}.json`);
-}
+// ---------------------------------------------------------------------------
+// Soft-delete / restore / purge
+// ---------------------------------------------------------------------------
 
-function getDeletedClassroomFilePath(id: string) {
-  return path.join(DELETED_CLASSROOMS_DIR, `${id}.json`);
-}
+const DELETED_RETENTION_DAYS = 180;
+const DELETED_RETENTION_MS = DELETED_RETENTION_DAYS * 24 * 60 * 60 * 1000;
 
 async function readDeletedIndex(): Promise<DeletedClassroomRecord[]> {
-  try {
-    const content = await fs.readFile(DELETED_INDEX_FILE, 'utf-8');
-    const parsed = JSON.parse(content) as DeletedClassroomRecord[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      return [];
-    }
-    throw error;
-  }
+  const buf = await getObjectStore().get(DELETED_INDEX_KEY);
+  if (!buf) return [];
+  const parsed = fromJsonBuffer<DeletedClassroomRecord[]>(buf);
+  return Array.isArray(parsed) ? parsed : [];
 }
 
-async function writeDeletedIndex(records: DeletedClassroomRecord[]) {
-  await ensureDir(DELETED_CLASSROOMS_DIR);
-  await writeJsonFileAtomic(DELETED_INDEX_FILE, records);
+async function writeDeletedIndex(records: DeletedClassroomRecord[]): Promise<void> {
+  await getObjectStore().put(DELETED_INDEX_KEY, toJsonBuffer(records), 'application/json');
 }
 
-export async function purgeExpiredDeletedClassrooms() {
+export async function purgeExpiredDeletedClassrooms(): Promise<{ purgedCount: number }> {
   let purgedCount = 0;
+
   const work = async () => {
     const now = Date.now();
     const records = await readDeletedIndex();
@@ -152,16 +173,7 @@ export async function purgeExpiredDeletedClassrooms() {
       else keep.push(record);
     }
 
-    for (const record of purge) {
-      const deletedPath = getDeletedClassroomFilePath(record.id);
-      try {
-        await fs.unlink(deletedPath);
-      } catch (error) {
-        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-          throw error;
-        }
-      }
-    }
+    await Promise.all(purge.map((r) => getObjectStore().delete(deletedKey(r.id))));
 
     if (purge.length > 0) {
       await writeDeletedIndex(keep);
@@ -180,20 +192,14 @@ export async function softDeleteClassroom(params: {
   ownerUserId: string;
   deletedBy: string;
 }) {
-  await ensureDir(CLASSROOMS_DIR);
-  await ensureDir(DELETED_CLASSROOMS_DIR);
+  const store = getObjectStore();
 
-  const source = getClassroomFilePath(params.id);
-  const destination = getDeletedClassroomFilePath(params.id);
+  // Check the classroom exists
+  const buf = await store.get(classroomKey(params.id));
+  if (!buf) return { deleted: false as const };
 
-  try {
-    await fs.rename(source, destination);
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      return { deleted: false as const };
-    }
-    throw error;
-  }
+  // Move active → deleted
+  await store.move(classroomKey(params.id), deletedKey(params.id));
 
   const deletedAt = new Date();
   const purgeAt = new Date(deletedAt.getTime() + DELETED_RETENTION_MS);
@@ -217,17 +223,39 @@ export async function softDeleteClassroom(params: {
   return { deleted: true as const, record };
 }
 
-export async function listDeletedClassrooms() {
-  await ensureDir(DELETED_CLASSROOMS_DIR);
+export async function listDeletedClassrooms(): Promise<DeletedClassroomRecord[]> {
   await purgeExpiredDeletedClassrooms();
   const records = await readDeletedIndex();
-  return records.sort((a, b) => new Date(b.deletedAt).getTime() - new Date(a.deletedAt).getTime());
+  return records.sort(
+    (a, b) => new Date(b.deletedAt).getTime() - new Date(a.deletedAt).getTime(),
+  );
 }
 
-export async function restoreDeletedClassroom(id: string) {
-  await ensureDir(CLASSROOMS_DIR);
-  await ensureDir(DELETED_CLASSROOMS_DIR);
+export async function readDeletedClassroom(id: string): Promise<PersistedClassroomData | null> {
+  const buf = await getObjectStore().get(deletedKey(id));
+  if (!buf) return null;
+  return fromJsonBuffer<PersistedClassroomData>(buf);
+}
 
+export async function purgeDeletedClassroom(id: string): Promise<boolean> {
+  let purged = false;
+
+  const work = async () => {
+    const records = await readDeletedIndex();
+    const target = records.find((r) => r.id === id);
+    if (!target) return;
+
+    await getObjectStore().delete(deletedKey(id));
+    await writeDeletedIndex(records.filter((r) => r.id !== id));
+    purged = true;
+  };
+
+  _indexLock = _indexLock.then(work);
+  await _indexLock;
+  return purged;
+}
+
+export async function restoreDeletedClassroom(id: string): Promise<DeletedClassroomRecord | null> {
   let restored: DeletedClassroomRecord | null = null;
 
   const work = async () => {
@@ -235,18 +263,10 @@ export async function restoreDeletedClassroom(id: string) {
     const target = records.find((r) => r.id === id);
     if (!target) return;
 
-    const source = getDeletedClassroomFilePath(id);
-    const destination = getClassroomFilePath(id);
+    const exists = await getObjectStore().exists(deletedKey(id));
+    if (!exists) return;
 
-    try {
-      await fs.rename(source, destination);
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-        return;
-      }
-      throw error;
-    }
-
+    await getObjectStore().move(deletedKey(id), classroomKey(id));
     await writeDeletedIndex(records.filter((r) => r.id !== id));
     restored = target;
   };

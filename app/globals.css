@@ -125,6 +125,24 @@
   }
 }
 
+/* ── Font-size-responsive spacing ─────────────────────────────────────────
+   Tailwind v4 spacing utilities are generated as calc(var(--spacing) * N).
+   By nudging --spacing we make ALL margins, gaps and padding scale in
+   step with the user's chosen text size, so sections and boxes feel
+   proportionally spaced at every preference level.
+
+   Small  (16 px root) → spacing factor 0.875  – compact
+   Default(18 px root) → spacing factor 1.000  – standard
+   Large  (20 px root) → spacing factor 1.125  – airy
+   ──────────────────────────────────────────────────────────────────────── */
+html[data-font-size="small"] {
+  --spacing: 0.21875rem; /* 0.25 × 0.875 */
+}
+
+html[data-font-size="large"] {
+  --spacing: 0.28125rem; /* 0.25 × 1.125 */
+}
+
 /* ProseMirror Editor Styles */
 .prosemirror-editor {
   cursor: text;

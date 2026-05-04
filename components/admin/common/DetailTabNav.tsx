@@ -22,7 +22,7 @@ export function DetailTabNav({ tabs }: DetailTabNavProps) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex items-center gap-1 rounded-xl border border-white/10 bg-white/5 p-1.5 text-sm">
+    <nav className="flex items-center gap-1 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-1.5 text-sm">
       {tabs.map((tab) => {
         // Match: exact or has trailing sub-path (for index redirects)
         const isActive = pathname === tab.href || pathname.startsWith(tab.href + '/');
@@ -33,8 +33,8 @@ export function DetailTabNav({ tabs }: DetailTabNavProps) {
             className={cn(
               'rounded-lg px-3 py-1.5 transition-colors',
               isActive
-                ? 'bg-white/10 text-white font-medium'
-                : 'text-slate-400 hover:bg-white/6 hover:text-white',
+                ? 'bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white font-medium'
+                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/6 hover:text-slate-900 dark:hover:text-white',
             )}
             aria-current={isActive ? 'page' : undefined}
           >

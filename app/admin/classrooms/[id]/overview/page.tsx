@@ -18,7 +18,7 @@ export default async function AdminClassroomOverviewPage({ params }: { params: P
 
   return (
     <section className="rounded-xl border border-white/10 bg-white/5 p-5">
-      <h1 className="mb-4 text-xl font-semibold text-white"><I18nText k="adminClassroomOverview.title" fallback="Classroom Overview" /></h1>
+      <h1 className="mb-4 text-xl font-semibold text-slate-900 dark:text-white"><I18nText k="adminClassroomOverview.title" fallback="Classroom Overview" /></h1>
       <dl className="grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
         <Row label={<I18nText k="adminClassroomOverview.classroomId" fallback="Classroom ID" />} value={classroom.id} mono />
         <Row label={<I18nText k="adminClassroomOverview.title_field" fallback="Title" />} value={classroom.stage.name || classroom.id} />

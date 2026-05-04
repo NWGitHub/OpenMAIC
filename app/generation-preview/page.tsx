@@ -609,6 +609,11 @@ function GenerationPreviewContent() {
             .catch(reject);
         });
 
+        // In interactive mode, override all outline types to 'interactive'
+        if (currentSession.interactiveMode) {
+          outlines = outlines.map((o) => ({ ...o, type: 'interactive' as const }));
+        }
+
         const updatedSession = { ...currentSession, sceneOutlines: outlines };
         setSession(updatedSession);
         sessionStorage.setItem('generationSession', JSON.stringify(updatedSession));

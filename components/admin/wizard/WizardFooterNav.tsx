@@ -21,8 +21,8 @@ export function WizardFooterNav({
   nextLabel = 'Next',
 }: WizardFooterNavProps) {
   return (
-    <div className="mt-6 flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-3">
-      <Button type="button" variant="outline" className="gap-1.5 border-white/10 text-slate-200" onClick={onBack} disabled={!onBack || isSaving}>
+    <div className="mt-6 flex items-center justify-between rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-3">
+      <Button type="button" variant="outline" className="gap-1.5 border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-200" onClick={onBack} disabled={!onBack || isSaving}>
         <ArrowLeft className="h-4 w-4" />
         {backLabel}
       </Button>

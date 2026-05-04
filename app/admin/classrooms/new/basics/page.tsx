@@ -36,33 +36,33 @@ export default function ClassroomWizardBasicsPage() {
       <ValidationSummary errors={errors} />
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="classroom-id" className="text-slate-200">Classroom ID</Label>
+          <Label htmlFor="classroom-id" className="text-slate-700 dark:text-slate-200">Classroom ID</Label>
           <Input
             id="classroom-id"
             value={draft.classroomId}
             onChange={(e) => setDraft({ classroomId: e.target.value })}
             placeholder="ENG101-2026-S1"
-            className="border-white/10 bg-black/20 text-white"
+            className="border-slate-300 dark:border-white/10 bg-white dark:bg-black/20 text-slate-900 dark:text-white"
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="title" className="text-slate-200">Title</Label>
+          <Label htmlFor="title" className="text-slate-700 dark:text-slate-200">Title</Label>
           <Input
             id="title"
             value={draft.title}
             onChange={(e) => setDraft({ title: e.target.value })}
             placeholder="English 101 Spring 2026"
-            className="border-white/10 bg-black/20 text-white"
+            className="border-slate-300 dark:border-white/10 bg-white dark:bg-black/20 text-slate-900 dark:text-white"
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="description" className="text-slate-200">Description</Label>
+          <Label htmlFor="description" className="text-slate-700 dark:text-slate-200">Description</Label>
           <textarea
             id="description"
             value={draft.description}
             onChange={(e) => setDraft({ description: e.target.value })}
             placeholder="Class description"
-            className="min-h-24 w-full rounded-md border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none"
+            className="min-h-24 w-full rounded-md border border-slate-300 dark:border-white/10 bg-white dark:bg-black/20 px-3 py-2 text-sm text-slate-900 dark:text-white outline-none"
           />
         </div>
       </div>

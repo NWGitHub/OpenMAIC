@@ -3,7 +3,11 @@
     "you": "คุณ",
     "confirm": "ยืนยัน",
     "cancel": "ยกเลิก",
-    "loading": "กำลังโหลด..."
+    "loading": "กำลังโหลด...",
+    "pagination": {
+      "previous": "ก่อนหน้า",
+      "next": "ถัดไป"
+    }
   },
   "home": {
     "slogan": "การเรียนรู้เชิงสร้างสรรค์ในห้องเรียนโต้ตอบหลายเอเจนต์",
@@ -117,7 +121,8 @@
     "confirmSwitchMessage": "ขณะนี้กำลังมีหัวข้อดำเนินอยู่ การสลับฉากจะสิ้นสุดหัวข้อปัจจุบัน คุณแน่ใจหรือไม่?",
     "generatingNextPage": "กำลังสร้างฉาก โปรดรอสักครู่...",
     "fullscreen": "เต็มหน้าจอ",
-    "exitFullscreen": "ออกจากโหมดเต็มหน้าจอ"
+    "exitFullscreen": "ออกจากโหมดเต็มหน้าจอ",
+    "interactiveMode": "โหมดโต้ตอบ"
   },
   "whiteboard": {
     "title": "ไวท์บอร์ดโต้ตอบ",
@@ -270,7 +275,18 @@
     "delete": "ลบ",
     "rename": "เปลี่ยนชื่อ",
     "renamePlaceholder": "ใส่ชื่อห้องเรียน",
-    "renameFailed": "เปลี่ยนชื่อห้องเรียนไม่สำเร็จ"
+    "renameFailed": "เปลี่ยนชื่อห้องเรียนไม่สำเร็จ",
+    "enrolledClassrooms": "ห้องเรียนที่ลงทะเบียน",
+    "scenesCompleted": "ฉากที่เสร็จแล้ว",
+    "newAssignments": "งานใหม่",
+    "newAssignmentBanner": "งานใหม่",
+    "noInvitedClassrooms": "ยังไม่มีห้องเรียนที่ได้รับมอบหมาย ขอลิงก์เชิญจากผู้สอนของคุณ",
+    "progress": "ความคืบหน้า",
+    "grades": "เกรด",
+    "continue": "ต่อ",
+    "start": "เริ่ม",
+    "open": "เปิด",
+    "scenes": "ฉาก"
   },
   "upload": {
     "pdfSizeLimit": "รองรับไฟล์ PDF สูงสุด 50MB",
@@ -1007,97 +1023,6 @@
     "cancel": "ยกเลิก",
     "confirmAnonymize": "ใช่ ทำให้ไม่ระบุตัวตน"
   },
-  "adminClassrooms": {
-    "title": "การจัดการห้องเรียน",
-    "newClassroom": "สร้างห้องเรียนใหม่",
-    "newClassroomDisabled": "สร้างห้องเรียนใหม่ (ตัวช่วยถูกปิดใช้งาน)",
-    "noClassrooms": "ยังไม่มีห้องเรียน",
-    "noClassroomsDesc": "สร้างห้องเรียนด้วยขั้นตอนการตั้งค่าแบบมีคำแนะนำ",
-    "manage": "จัดการ",
-    "recover": "กู้คืน",
-    "missing": "ไม่พบ",
-    "recoverSuccess": "กู้คืนห้องเรียนสำเร็จ",
-    "recoverFailed": "กู้คืนห้องเรียนล้มเหลว",
-    "columns": {
-      "classroom": "ห้องเรียน",
-      "title": "ชื่อ",
-      "owner": "เจ้าของ",
-      "students": "นักเรียน",
-      "updated": "อัปเดต"
-    }
-  },
-  "adminRoles": {
-    "title": "การจัดการบทบาท",
-    "subtitle": "จัดการบทบาทในตัวและแบบกำหนดเองพร้อมสิทธิ์ที่เฉพาะเจาะจง",
-    "newRole": "บทบาทใหม่",
-    "noRoles": "ไม่พบบทบาท",
-    "noRolesDesc": "สร้างบทบาทแบบกำหนดเองเพื่อเริ่มต้น",
-    "accessDeniedTitle": "ถูกปฏิเสธการเข้าถึง",
-    "accessDenied": "คุณไม่มีสิทธิ์ดูบทบาท",
-    "loadFailed": "โหลดบทบาทล้มเหลว",
-    "deleteConfirm": "ลบบทบาทแบบกำหนดเองนี้? การดำเนินการนี้ไม่สามารถยกเลิกได้",
-    "builtIn": "ในตัว",
-    "custom": "กำหนดเอง",
-    "permissions": "สิทธิ์",
-    "manageRole": "จัดการบทบาท",
-    "deleteRole": "ลบบทบาท",
-    "columns": {
-      "name": "ชื่อ",
-      "displayName": "ชื่อที่แสดง",
-      "type": "ประเภท",
-      "permissions": "สิทธิ์"
-    }
-  },
-  "adminSettings": {
-    "title": "การตั้งค่าทั่วไป",
-    "subtitle": "กำหนดค่าเริ่มต้นและพฤติกรรมระดับระบบ",
-    "changesNotice": "การตั้งค่าถูกเปลี่ยน คลิกบันทึกเพื่อใช้งาน",
-    "save": "บันทึกการเปลี่ยนแปลง",
-    "saving": "กำลังบันทึก...",
-    "savedSuccess": "บันทึกการตั้งค่าสำเร็จ",
-    "saveFailed": "บันทึกการตั้งค่าล้มเหลว",
-    "loadFailed": "โหลดการตั้งค่าล้มเหลว",
-    "noChanges": "ไม่มีการเปลี่ยนแปลงที่จะบันทึก",
-    "allSaved": "บันทึกการเปลี่ยนแปลงทั้งหมดแล้ว",
-    "providerManagerTitle": "ตัวจัดการผู้ให้บริการและโมเดล",
-    "providerManagerDesc": "จัดการผู้ให้บริการ LLM, คีย์ API, URL พื้นฐาน และรายการโมเดล",
-    "openProviderManager": "เปิดตัวจัดการผู้ให้บริการ"
-  },
-  "profilePage": {
-    "title": "โปรไฟล์ของฉัน",
-    "back": "← กลับ",
-    "profileInfo": "ข้อมูลโปรไฟล์",
-    "fullName": "ชื่อเต็ม",
-    "bio": "แนะนำตัว",
-    "saveChanges": "บันทึกการเปลี่ยนแปลง",
-    "saveSuccess": "อัปเดตโปรไฟล์แล้ว",
-    "saveFailed": "บันทึกล้มเหลว",
-    "email": "อีเมล",
-    "studentId": "รหัสนักศึกษา",
-    "role": "บทบาท",
-    "memberSince": "สมาชิกตั้งแต่",
-    "lastLogin": "เข้าสู่ระบบล่าสุด",
-    "changePassword": "เปลี่ยนรหัสผ่าน",
-    "currentPassword": "รหัสผ่านปัจจุบัน",
-    "newPassword": "รหัสผ่านใหม่ (อย่างน้อย 10 ตัว)",
-    "confirmPassword": "ยืนยันรหัสผ่านใหม่",
-    "pwMismatch": "รหัสผ่านไม่ตรงกัน",
-    "pwTooShort": "รหัสผ่านใหม่ต้องมีอย่างน้อย 10 ตัวอักษร",
-    "pwChangeFailed": "ล้มเหลว",
-    "pwChangeSuccess": "เปลี่ยนรหัสผ่านสำเร็จ",
-    "updatePassword": "อัปเดตรหัสผ่าน",
-    "privacyTitle": "ความเป็นส่วนตัวและข้อมูล (PDPA)",
-    "consentGiven": "ให้ความยินยอมแล้ว",
-    "consentYes": "ใช่",
-    "consentNo": "ไม่",
-    "exportData": "ส่งออกข้อมูลของฉัน (JSON)",
-    "deleteAccount": "ลบบัญชีของฉัน",
-    "pdpaNotice": "ภายใต้ PDPA ของไทย คุณมีสิทธิ์เข้าถึง แก้ไข และลบข้อมูลส่วนบุคคลของคุณ ข้อมูลส่วนบุคคลของคุณจะถูกทำให้ไม่ระบุตัวตนอย่างถาวร หมายเหตุ: บันทึกทางวิชาการที่จำเป็นจะถูกเก็บรักษาเพื่อการปฏิบัติตามกฎระเบียบ",
-    "anonymizeTitle": "ทำให้ไม่ระบุตัวตน?",
-    "anonymizeDesc": "บัญชีและข้อมูลส่วนบุคคลของคุณจะถูกทำให้ไม่ระบุตัวตนอย่างถาวรและคุณจะถูกออกจากระบบ บันทึกทางวิชาการของคุณจะถูกเก็บรักษาไว้อย่างปลอดภัย การดำเนินการนี้ไม่สามารถยกเลิกได้",
-    "cancel": "ยกเลิก",
-    "confirmAnonymize": "ใช่ ทำให้ไม่ระบุตัวตน"
-  },
   "quickPreferences": {
     "theme": "ธีม",
     "light": "สว่าง",
@@ -1169,6 +1094,46 @@
     "students": "นักเรียน",
     "created": "สร้างเมื่อ",
     "manage": "จัดการ"
+  },
+  "studentDashboard": {
+    "title": "แดชบอร์ดนักเรียน",
+    "welcomeBack": "ยินดีต้อนรับกลับ,",
+    "taskMenu": "การดำเนินการด่วน",
+    "taskMenuDescription": "ไปยังกิจกรรมการเรียนรู้หลักของคุณ",
+    "taskDashboard": "แดชบอร์ดของฉัน",
+    "taskDashboardSub": "ห้องเรียนที่ลงทะเบียน",
+    "taskMyClassrooms": "ห้องเรียนของฉัน",
+    "taskMyClassroomsSubNew": "{{count}} งานใหม่",
+    "taskMyClassroomsSubNewPlural": "{{count}} งานใหม่",
+    "taskMyClassroomsSubNone": "ทันสมัยทั้งหมด",
+    "taskMyProgress": "ความคืบหน้าของฉัน",
+    "taskMyProgressSub": "จาก {{total}} ฉาก",
+    "taskSettings": "โปรไฟล์ของฉัน",
+    "taskSettingsSub": "ดูและแก้ไขโปรไฟล์ของคุณ",
+    "backToDashboard": "กลับไปยังแดชบอร์ด",
+    "classroomsViewTitle": "ห้องเรียนของฉัน",
+    "createClassroomTitle": "สร้างห้องเรียนใหม่",
+    "createClassroomDesc": "อธิบายหัวข้อที่ต้องการเรียนรู้และให้ AI สร้างห้องเรียนให้คุณ",
+    "invitedSectionTitle": "ห้องเรียนที่ลงทะเบียน",
+    "ownedSectionTitle": "ห้องเรียนที่ฉันสร้าง",
+    "noOwnedClassrooms": "คุณยังไม่ได้สร้างห้องเรียนใดๆ",
+    "pageOf": "หน้า {{page}} จาก {{total}}",
+    "progressViewTitle": "ความก้าวหน้าของฉัน",
+    "overallSummary": "ภาพรวม",
+    "overallScore": "คะแนนรวม",
+    "sceneProgressLabel": "ความก้าวหน้าของฉาก",
+    "quizPerformanceLabel": "ผลการทดสอบ",
+    "noQuizResults": "ยังไม่มีผลการทดสอบ",
+    "loadingGrades": "กำลังโหลดเกรด...",
+    "quizResultCount": "{{count}} ผลลัพธ์",
+    "quizResultCountPlural": "{{count}} ผลลัพธ์",
+    "profileViewTitle": "โปรไฟล์ของฉัน",
+    "displayPreferences": "การตั้งค่าการแสดงผล",
+    "aiNickname": "ชื่อเล่น AI",
+    "aiNicknameDesc": "ชื่อที่แสดงในห้องเรียน AI",
+    "avatarSelect": "เลือกอวาตาร์ของคุณ",
+    "savePreferences": "บันทึกการตั้งค่า",
+    "preferencesSaved": "บันทึกการตั้งค่าแล้ว"
   },
   "instructorClassrooms": {
     "title": "ห้องเรียน",
@@ -1488,7 +1453,8 @@
       "enrollFailed": "สร้างห้องเรียนสำเร็จ แต่การลงทะเบียนนักเรียนที่เชื่อมบัญชีล้มเหลว",
       "manualEnrollFailed": "สร้างห้องเรียนสำเร็จ แต่นักเรียน {{count}} คนที่เพิ่มด้วยตนเองต้องดำเนินการต่อในแท็บ 'นักเรียน'",
       "created": "สร้างห้องเรียนสำเร็จ!",
-      "unexpectedError": "เกิดข้อผิดพลาดที่ไม่คาดคิด"
+      "unexpectedError": "เกิดข้อผิดพลาดที่ไม่คาดคิด",
+      "backToClassroom": "กลับไปที่ห้องเรียน"
     },
     "schedule": {
       "stepLabel": "ขั้นตอนที่ 4 จาก 5",
@@ -1501,6 +1467,50 @@
       "scheduled": "ตามตารางเรียน",
       "startDateLabel": "วันที่เริ่มต้น (ไม่บังคับ)",
       "endDateLabel": "วันที่สิ้นสุด (ไม่บังคับ)"
+    }
+  },
+  "generateScenes": {
+    "title": "สร้างฉากบทเรียน",
+    "subtitle": "สร้างฉากการเรียนรู้ด้วย AI สำหรับ {{name}}",
+    "forClassroom": "สำหรับห้องเรียน",
+    "promptLabel": "ห้องเรียนนี้ควรสอนอะไร?",
+    "promptHint": "อธิบายหัวข้อ เป้าหมายการเรียนรู้ หรือวางแผนหลักสูตรของคุณ",
+    "promptPlaceholder": "เช่น บทนำกฎของนิวตันสำหรับนักเรียนมัธยมปลาย…",
+    "generating": "กำลังสร้าง…",
+    "generateBtn": "สร้างฉากบทเรียน",
+    "setupModel": "ตั้งค่าโมเดล",
+    "tip": "เคล็ดลับ: กด ⌘ + Enter เพื่อเริ่มสร้าง"
+  },
+  "canvas": {
+    "contextMenu": {
+      "cut": "ตัด",
+      "copy": "คัดลอก",
+      "paste": "วาง",
+      "selectAll": "เลือกทั้งหมด",
+      "delete": "ลบ",
+      "lock": "ล็อก",
+      "unlock": "ปลดล็อก",
+      "setLink": "ตั้งค่าลิงก์",
+      "group": "จัดกลุ่ม",
+      "ungroup": "ยกเลิกกลุ่ม",
+      "ruler": "ไม้บรรทัด",
+      "gridLines": "เส้นตาราง",
+      "gridNone": "ไม่มี",
+      "gridSmall": "เล็ก",
+      "gridMedium": "กลาง",
+      "gridLarge": "ใหญ่",
+      "resetPage": "รีเซ็ตหน้า",
+      "alignHorizontal": "จัดกึ่งกลางแนวนอน",
+      "alignVertical": "จัดกึ่งกลางแนวตั้ง",
+      "alignCenter": "จัดกึ่งกลางทั้งสองแนว",
+      "alignLeft": "จัดชิดซ้าย",
+      "alignRight": "จัดชิดขวา",
+      "alignTop": "จัดชิดบน",
+      "alignBottom": "จัดชิดล่าง",
+      "bringToFront": "นำมาหน้าสุด",
+      "bringForward": "นำขึ้นมาหนึ่งชั้น",
+      "sendToBack": "ส่งไปหลังสุด",
+      "sendBackward": "ส่งลงไปหนึ่งชั้น"
     }
   },
   "media": {
@@ -1517,5 +1527,21 @@
     "voice": "เสียง",
     "speed": "ความเร็ว",
     "language": "ภาษา"
+  },
+  "signIn": {
+    "title": "เข้าสู่ระบบบัญชีของคุณ",
+    "emailLabel": "อีเมล",
+    "passwordLabel": "รหัสผ่าน",
+    "showPassword": "แสดงรหัสผ่าน",
+    "hidePassword": "ซ่อนรหัสผ่าน",
+    "signingIn": "กำลังเข้าสู่ระบบ…",
+    "submit": "เข้าสู่ระบบ",
+    "orContinueWith": "หรือดำเนินการต่อด้วย",
+    "pdpaNotice": "ได้รับการคุ้มครองโดย PDPA ของไทย เมื่อเข้าสู่ระบบ คุณยอมรับแนวปฏิบัติข้อมูลของเรา",
+    "errors": {
+      "CredentialsSignin": "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+      "AccountDisabled": "บัญชีของคุณถูกปิดใช้งาน กรุณาติดต่อผู้ดูแลระบบ",
+      "Default": "การเข้าสู่ระบบล้มเหลว กรุณาลองอีกครั้ง"
+    }
   }
 }

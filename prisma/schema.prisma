@@ -90,6 +90,8 @@ model User {
   accounts        Account[]
   sessions        Session[]
   classroomAccess ClassroomAccess[]
+  sceneProgress   SceneProgress[]
+  pblSessions     PBLSession[]
   auditLogs       AuditLog[]        @relation("UserAuditLogs")
   performedAudits AuditLog[]        @relation("ActorAuditLogs")
 
@@ -99,11 +101,12 @@ model User {
 // ---- Classroom access -------------------------------------------------------
 
 model ClassroomAccess {
-  id          String   @id @default(cuid())
-  userId      String   @map("user_id")
-  classroomId String   @map("classroom_id")
-  assignedBy  String   @map("assigned_by")
-  assignedAt  DateTime @default(now()) @map("assigned_at")
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id")
+  classroomId       String   @map("classroom_id")
+  assignedBy        String   @map("assigned_by")
+  assignedAt        DateTime @default(now()) @map("assigned_at")
+  unreadAssignment  Boolean  @default(true) @map("unread_assignment")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -207,6 +210,42 @@ model QuizResult {
   @@index([classroomId])
   @@index([classroomId, studentDbUserId])
   @@map("quiz_results")
+}
+
+// ---- Scene progress (student completion tracking) ---------------------------
+
+model SceneProgress {
+  id           String    @id @default(cuid())
+  userId       String    @map("user_id")
+  classroomId  String    @map("classroom_id")
+  sceneId      String    @map("scene_id")
+  completedAt  DateTime? @map("completed_at")
+  lastViewedAt DateTime  @default(now()) @map("last_viewed_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, classroomId, sceneId])
+  @@index([userId, classroomId])
+  @@map("scene_progress")
+}
+
+// ---- PBL session transcript -------------------------------------------------
+
+model PBLSession {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  classroomId String   @map("classroom_id")
+  sceneId     String   @map("scene_id")
+  /// JSON array of { role, agentId?, agentName?, content, timestamp }
+  messages    Json     @default("[]")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, classroomId, sceneId])
+  @@index([userId, classroomId])
+  @@map("pbl_sessions")
 }
 
 // ---- System Settings --------------------------------------------------------

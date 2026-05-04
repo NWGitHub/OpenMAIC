@@ -148,7 +148,7 @@ export function useScaleElement(
       command: OperateResizeHandlers,
     ) => {
       const native = e.nativeEvent;
-      const isTouchEvent = native instanceof TouchEvent;
+      const isTouchEvent = typeof TouchEvent !== 'undefined' && native instanceof TouchEvent;
       if (isTouchEvent && !native.changedTouches?.length) return;
 
       let isMouseDown = true;
@@ -167,8 +167,8 @@ export function useScaleElement(
       const fixedRatio = ctrlOrShiftKeyActive || ('fixedRatio' in element && element.fixedRatio);
       const aspectRatio = elOriginWidth / elOriginHeight;
 
-      const startPageX = isTouchEvent ? native.changedTouches[0].pageX : native.pageX;
-      const startPageY = isTouchEvent ? native.changedTouches[0].pageY : native.pageY;
+      const startPageX = isTouchEvent ? (native as TouchEvent).changedTouches[0].pageX : (native as MouseEvent).pageX;
+      const startPageY = isTouchEvent ? (native as TouchEvent).changedTouches[0].pageY : (native as MouseEvent).pageY;
 
       // Minimum scale size limit for element
       const minSize = MIN_SIZE[element.type] || 20;

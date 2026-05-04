@@ -109,13 +109,7 @@ export default function ReviewPage() {
 
       toast.success(t('classroomWizard.review.created'));
       reset();
-      const params = new URLSearchParams({
-        wizardClassroomId: classroomId,
-        wizardClassroomTitle: title.trim(),
-        prefillRequirement: (description.trim() || title.trim()).trim(),
-        wizardLanguage: language,
-      });
-      router.push(`/?${params.toString()}`);
+      router.push(`/instructor/classrooms/${classroomId}/generate-scenes`);
     } catch (err) {
       toast.error(t('classroomWizard.review.unexpectedError'));
       console.error('[wizard/review] create error', err);
@@ -148,7 +142,7 @@ export default function ReviewPage() {
     >
       <div className="space-y-6">
         <div>
-          <h2 className="text-lg font-semibold text-white">{t('classroomWizard.review.sectionTitle')}</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('classroomWizard.review.sectionTitle')}</h2>
           <p className="mt-1 text-sm text-slate-400">
             {t('classroomWizard.review.sectionDesc')}
           </p>
@@ -177,7 +171,7 @@ export default function ReviewPage() {
             </p>
             <ul className="space-y-1">
               {pendingStudents.map((s, i) => (
-                <li key={i} className="flex items-center gap-2 text-sm text-slate-300">
+                <li key={i} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
                   {s.name}
                   {s.email && <span className="text-slate-500 text-xs">&lt;{s.email}&gt;</span>}
@@ -200,9 +194,9 @@ export default function ReviewPage() {
 
 function ReviewRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-white/10 bg-black/20 px-3 py-2">
+    <div className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-black/20 px-3 py-2">
       <dt className="text-xs uppercase tracking-wider text-slate-500">{label}</dt>
-      <dd className="mt-1 text-sm text-slate-200">{value}</dd>
+      <dd className="mt-1 text-sm text-slate-700 dark:text-slate-200">{value}</dd>
     </div>
   );
 }

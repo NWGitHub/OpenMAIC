@@ -2,7 +2,11 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { requireRole, ensureClassroomOwnership } from '@/lib/auth/helpers';
 import { prisma } from '@/lib/auth/prisma';
-import { listDeletedClassrooms, restoreDeletedClassroom } from '@/lib/server/classroom-storage';
+import {
+  listDeletedClassrooms,
+  readDeletedClassroom,
+  restoreDeletedClassroom,
+} from '@/lib/server/classroom-storage';
 
 /** GET /api/admin/classrooms/recover - list soft-deleted classrooms */
 export async function GET() {
@@ -12,7 +16,19 @@ export async function GET() {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const classrooms = await listDeletedClassrooms();
+  const records = await listDeletedClassrooms();
+
+  // Enrich each record with the classroom name from its deleted JSON file.
+  const classrooms = await Promise.all(
+    records.map(async (r) => {
+      const data = await readDeletedClassroom(r.id);
+      return {
+        ...r,
+        name: data?.stage?.name ?? null,
+      };
+    }),
+  );
+
   return NextResponse.json({ classrooms });
 }
 

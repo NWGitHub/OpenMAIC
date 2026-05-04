@@ -75,7 +75,7 @@ export function WizardShell({
         onSaveDraft={onSaveDraft}
       />
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-[280px_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-[18rem_minmax(0,1fr)]">
         <WizardStepSidebar steps={steps} currentStepId={currentStepId} stepState={stepState} />
         <section className="rounded-xl border border-white/10 bg-white/5 p-4">
           {children}

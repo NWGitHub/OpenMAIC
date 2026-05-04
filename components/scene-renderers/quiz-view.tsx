@@ -1107,6 +1107,15 @@ export function QuizView({ questions, sceneId }: QuizViewProps) {
             log.warn('[quiz-view] Failed to persist quiz result to DB:', payload.error || persistRes.statusText);
           }
 
+          // Mark quiz scene as completed in scene progress
+          if (isStudentRole) {
+            fetch('/api/scene-progress', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ classroomId: stageId, sceneId, completed: true }),
+            }).catch(() => {});
+          }
+
           await loadAttempts();
         } catch (saveErr) {
           log.warn('[quiz-view] Failed to persist quiz attempt:', saveErr);

@@ -1,16 +1,23 @@
-import { promises as fs } from 'fs';
-import path from 'path';
+/**
+ * Classroom generation job persistence.
+ *
+ * Jobs are stored as JSON objects under the key:
+ *   classroom-jobs/{jobId}.json
+ *
+ * The storage backend is selected via STORAGE_BACKEND (local filesystem or S3).
+ */
+
+import { getObjectStore, toJsonBuffer, fromJsonBuffer } from '@/lib/storage/object-store';
 import type {
   ClassroomGenerationProgress,
   ClassroomGenerationStep,
   GenerateClassroomInput,
   GenerateClassroomResult,
 } from '@/lib/server/classroom-generation';
-import {
-  CLASSROOM_JOBS_DIR,
-  ensureClassroomJobsDir,
-  writeJsonFileAtomic,
-} from '@/lib/server/classroom-storage';
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 export type ClassroomGenerationJobStatus = 'queued' | 'running' | 'succeeded' | 'failed';
 
@@ -41,9 +48,11 @@ export interface ClassroomGenerationJob {
   error?: string;
 }
 
-function jobFilePath(jobId: string) {
-  return path.join(CLASSROOM_JOBS_DIR, `${jobId}.json`);
-}
+// ---------------------------------------------------------------------------
+// Key helpers
+// ---------------------------------------------------------------------------
+
+const jobKey = (jobId: string) => `classroom-jobs/${jobId}.json`;
 
 function buildInputSummary(input: GenerateClassroomInput): ClassroomGenerationJob['inputSummary'] {
   return {
@@ -56,12 +65,15 @@ function buildInputSummary(input: GenerateClassroomInput): ClassroomGenerationJo
   };
 }
 
-/** Simple per-job mutex to serialize read-modify-write on the same job file. */
+// ---------------------------------------------------------------------------
+// Per-job mutex (process-local serialization of read-modify-write)
+// ---------------------------------------------------------------------------
+
 const jobLocks = new Map<string, Promise<void>>();
 
 async function withJobLock<T>(jobId: string, fn: () => Promise<T>): Promise<T> {
   const prev = jobLocks.get(jobId) ?? Promise.resolve();
-  let resolve: () => void;
+  let resolve!: () => void;
   const next = new Promise<void>((r) => {
     resolve = r;
   });
@@ -70,12 +82,16 @@ async function withJobLock<T>(jobId: string, fn: () => Promise<T>): Promise<T> {
     await prev;
     return await fn();
   } finally {
-    resolve!();
+    resolve();
     if (jobLocks.get(jobId) === next) jobLocks.delete(jobId);
   }
 }
 
-/** Max age (ms) before a "running" job without an active runner is considered stale. */
+// ---------------------------------------------------------------------------
+// Stale-job detection
+// ---------------------------------------------------------------------------
+
+/** Max age (ms) before a "running" job without progress is considered stale. */
 const STALE_JOB_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 
 function markStaleIfNeeded(job: ClassroomGenerationJob): ClassroomGenerationJob {
@@ -94,6 +110,10 @@ function markStaleIfNeeded(job: ClassroomGenerationJob): ClassroomGenerationJob 
   }
   return job;
 }
+
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
 
 export function isValidClassroomJobId(jobId: string): boolean {
   return /^[a-zA-Z0-9_-]+$/.test(jobId);
@@ -116,24 +136,17 @@ export async function createClassroomGenerationJob(
     scenesGenerated: 0,
   };
 
-  await ensureClassroomJobsDir();
-  await writeJsonFileAtomic(jobFilePath(jobId), job);
+  await getObjectStore().put(jobKey(jobId), toJsonBuffer(job), 'application/json');
   return job;
 }
 
 export async function readClassroomGenerationJob(
   jobId: string,
 ): Promise<ClassroomGenerationJob | null> {
-  try {
-    const content = await fs.readFile(jobFilePath(jobId), 'utf-8');
-    const job = JSON.parse(content) as ClassroomGenerationJob;
-    return markStaleIfNeeded(job);
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      return null;
-    }
-    throw error;
-  }
+  const buf = await getObjectStore().get(jobKey(jobId));
+  if (!buf) return null;
+  const job = fromJsonBuffer<ClassroomGenerationJob>(buf);
+  return markStaleIfNeeded(job);
 }
 
 export async function updateClassroomGenerationJob(
@@ -142,9 +155,7 @@ export async function updateClassroomGenerationJob(
 ): Promise<ClassroomGenerationJob> {
   return withJobLock(jobId, async () => {
     const existing = await readClassroomGenerationJob(jobId);
-    if (!existing) {
-      throw new Error(`Classroom generation job not found: ${jobId}`);
-    }
+    if (!existing) throw new Error(`Classroom generation job not found: ${jobId}`);
 
     const updated: ClassroomGenerationJob = {
       ...existing,
@@ -152,7 +163,7 @@ export async function updateClassroomGenerationJob(
       updatedAt: new Date().toISOString(),
     };
 
-    await writeJsonFileAtomic(jobFilePath(jobId), updated);
+    await getObjectStore().put(jobKey(jobId), toJsonBuffer(updated), 'application/json');
     return updated;
   });
 }
@@ -162,9 +173,7 @@ export async function markClassroomGenerationJobRunning(
 ): Promise<ClassroomGenerationJob> {
   return withJobLock(jobId, async () => {
     const existing = await readClassroomGenerationJob(jobId);
-    if (!existing) {
-      throw new Error(`Classroom generation job not found: ${jobId}`);
-    }
+    if (!existing) throw new Error(`Classroom generation job not found: ${jobId}`);
 
     const updated: ClassroomGenerationJob = {
       ...existing,
@@ -174,7 +183,7 @@ export async function markClassroomGenerationJobRunning(
       updatedAt: new Date().toISOString(),
     };
 
-    await writeJsonFileAtomic(jobFilePath(jobId), updated);
+    await getObjectStore().put(jobKey(jobId), toJsonBuffer(updated), 'application/json');
     return updated;
   });
 }

@@ -9,7 +9,7 @@ export default async function AdminClassroomSettingsPage({ params }: { params: P
 
   return (
     <section className="rounded-xl border border-white/10 bg-white/5 p-5">
-      <h1 className="mb-4 text-xl font-semibold text-white"><I18nText k="adminClassroomSettings.title" fallback="Settings" /></h1>
+      <h1 className="mb-4 text-xl font-semibold text-slate-900 dark:text-white"><I18nText k="adminClassroomSettings.title" fallback="Settings" /></h1>
       <div className="grid grid-cols-1 gap-3 text-sm md:grid-cols-2">
         <Card label={<I18nText k="adminClassroomSettings.ownerUserId" fallback="Owner user ID" />} value={classroom.stage.ownerUserId || 'Unknown'} mono />
         <Card label={<I18nText k="adminClassroomSettings.createdAt" fallback="Created at" />} value={new Date(classroom.createdAt).toLocaleString()} />

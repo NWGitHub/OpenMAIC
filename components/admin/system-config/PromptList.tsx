@@ -198,8 +198,8 @@ export function PromptList({
     <div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Prompt Studio</h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Prompt Studio</h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Create and manage AI prompt templates
           </p>
         </div>
@@ -218,7 +218,7 @@ export function PromptList({
               variant="outline"
               onClick={() => void exportPrompts()}
               disabled={exporting || importing}
-              className="gap-2 border-white/10 text-slate-300"
+              className="gap-2 border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300"
             >
               {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
               Export
@@ -238,7 +238,7 @@ export function PromptList({
                 }}
                 disabled={exporting || importing}
               />
-              <span className="inline-flex h-9 items-center gap-2 rounded-md border border-white/10 px-4 text-sm text-slate-300 hover:bg-white/5 cursor-pointer">
+              <span className="inline-flex h-9 items-center gap-2 rounded-md border border-slate-300 dark:border-white/10 px-4 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer">
                 {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                 Import
               </span>
@@ -249,13 +249,13 @@ export function PromptList({
 
       {/* Category + Status filter row */}
       <div className="mb-6 flex items-center gap-2 overflow-x-auto pb-2">
-        <span className="shrink-0 text-sm text-slate-400">Category:</span>
+        <span className="shrink-0 text-sm text-slate-500 dark:text-slate-400">Category:</span>
         <button
           onClick={() => setSelectedCategory('')}
           className={`px-3 py-1.5 rounded-lg text-sm whitespace-nowrap transition-colors ${
             selectedCategory === ''
               ? 'bg-purple-600 text-white'
-              : 'bg-white/10 text-slate-300 hover:bg-white/20'
+              : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/20'
           }`}
         >
           All
@@ -267,7 +267,7 @@ export function PromptList({
             className={`px-3 py-1.5 rounded-lg text-sm whitespace-nowrap transition-colors ${
               selectedCategory === cat
                 ? 'bg-purple-600 text-white'
-                : 'bg-white/10 text-slate-300 hover:bg-white/20'
+                : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/20'
             }`}
           >
             {categoryLabels[cat]}
@@ -275,13 +275,13 @@ export function PromptList({
         ))}
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
-          <span className="shrink-0 text-sm text-slate-400">Status:</span>
+          <span className="shrink-0 text-sm text-slate-500 dark:text-slate-400">Status:</span>
           <button
             onClick={() => setSelectedStatus('all')}
             className={`px-3 py-1.5 rounded-lg text-sm whitespace-nowrap transition-colors ${
               selectedStatus === 'all'
                 ? 'bg-purple-600 text-white'
-                : 'bg-white/10 text-slate-300 hover:bg-white/20'
+                : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/20'
             }`}
           >
             All ({promptsByCategory.length})
@@ -291,7 +291,7 @@ export function PromptList({
             className={`px-3 py-1.5 rounded-lg text-sm whitespace-nowrap transition-colors ${
               selectedStatus === 'active'
                 ? 'bg-green-600 text-white'
-                : 'bg-white/10 text-slate-300 hover:bg-white/20'
+                : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/20'
             }`}
           >
             Active ({activeCount})
@@ -301,7 +301,7 @@ export function PromptList({
             className={`px-3 py-1.5 rounded-lg text-sm whitespace-nowrap transition-colors ${
               selectedStatus === 'draft'
                 ? 'bg-slate-600 text-white'
-                : 'bg-white/10 text-slate-300 hover:bg-white/20'
+                : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/20'
             }`}
           >
             Draft ({draftCount})
@@ -325,38 +325,38 @@ export function PromptList({
           }
         />
       ) : (
-        <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5">
+        <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10">
+              <tr className="border-b border-slate-200 dark:border-white/10">
                 {['Key', 'Display Name', 'Category', 'Version', 'Status', ''].map((h) => (
                   <th
                     key={h}
-                    className="px-4 py-3 text-left text-xs uppercase tracking-wider text-slate-400 font-medium"
+                    className="px-4 py-3 text-left text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 font-medium"
                   >
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
               {visiblePrompts.map((prompt) => (
-                <tr key={prompt.id} className="hover:bg-white/5">
-                  <td className="px-4 py-3 font-mono text-xs text-slate-200">{prompt.key}</td>
-                  <td className="px-4 py-3 text-white">{prompt.displayName}</td>
+                <tr key={prompt.id} className="hover:bg-slate-50 dark:hover:bg-white/5">
+                  <td className="px-4 py-3 font-mono text-xs text-slate-700 dark:text-slate-200">{prompt.key}</td>
+                  <td className="px-4 py-3 text-slate-900 dark:text-white">{prompt.displayName}</td>
                   <td className="px-4 py-3">
-                    <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/15 text-blue-300">
+                    <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300">
                       {categoryLabels[prompt.category] || prompt.category}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-slate-400">v{prompt.version}</td>
+                  <td className="px-4 py-3 text-slate-500 dark:text-slate-400">v{prompt.version}</td>
                   <td className="px-4 py-3">
                     {prompt.isActive ? (
-                      <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/15 text-green-300">
+                      <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-300">
                         Active
                       </span>
                     ) : (
-                      <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-slate-500/15 text-slate-300">
+                      <span className="inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-500/15 text-slate-600 dark:text-slate-300">
                         Draft
                       </span>
                     )}
@@ -366,7 +366,7 @@ export function PromptList({
                       {canEdit && (
                         <Link
                           href={`/admin/system-config/prompts/${prompt.id}`}
-                          className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+                          className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
                           title="Edit prompt"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
@@ -376,7 +376,7 @@ export function PromptList({
                         <button
                           onClick={() => deletePrompt(prompt.id)}
                           disabled={deleting === prompt.id}
-                          className="p-1.5 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition-colors disabled:opacity-50"
+                          className="p-1.5 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors disabled:opacity-50"
                           title="Delete prompt"
                         >
                           {deleting === prompt.id ? (

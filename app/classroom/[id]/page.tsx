@@ -508,7 +508,7 @@ export default function ClassroomDetailPage() {
                   : json.classroom.stage;
               useStageStore.getState().setStage(stageWithOwnership as never);
               useStageStore.setState({
-                scenes: json.classroom.scenes,
+                scenes: json.classroom.scenes as import('@/lib/types/stage').Scene[],
                 currentSceneId: json.classroom.scenes[0]?.id ?? null,
               });
               ({ scenes, currentSceneId, setCurrentSceneId } = useStageStore.getState());
@@ -537,7 +537,11 @@ export default function ClassroomDetailPage() {
     if (!loading && !error && (shouldPromptNewScene || shouldPromptEditScene) && targetSceneId) {
       const stage = useStageStore.getState().stage;
       const scene = useStageStore.getState().scenes.find((s) => s.id === targetSceneId);
-      if (scene?.type) {
+      // URL param `sceneType` overrides the scene's existing type (used by Interactive Mode button)
+      const urlSceneType = searchParams.get('sceneType') as SceneType | null;
+      if (urlSceneType && ['slide', 'quiz', 'interactive', 'pbl'].includes(urlSceneType)) {
+        setScenePromptType(urlSceneType);
+      } else if (scene?.type) {
         setScenePromptType(scene.type);
       }
       const stageLanguage = stage?.language;
@@ -561,6 +565,7 @@ export default function ClassroomDetailPage() {
     shouldPromptEditScene,
     shouldPromptNewScene,
     targetSceneId,
+    searchParams,
   ]);
 
   return (
@@ -597,12 +602,16 @@ export default function ClassroomDetailPage() {
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/55 backdrop-blur-sm px-4">
                   <div className="w-full max-w-3xl rounded-2xl border border-white/10 bg-slate-950/95 p-5 shadow-2xl">
                     <h2 className="text-lg font-semibold text-white">
-                      {scenePromptMode === 'edit' ? 'Edit Scene with Prompt' : 'Create New Scene Content'}
+                      {canManageStudentsFromHeader
+                        ? (scenePromptMode === 'edit' ? 'Edit Scene with Prompt' : 'Create New Scene Content')
+                        : 'Interactive Mode'}
                     </h2>
                     <p className="mt-1 text-sm text-slate-400">
-                      {scenePromptMode === 'edit'
-                        ? 'Describe how to improve this scene. We will regenerate the current scene in AI Canvas.'
-                        : 'Describe what you want for this new scene. We will generate content directly in AI Canvas.'}
+                      {canManageStudentsFromHeader
+                        ? (scenePromptMode === 'edit'
+                          ? 'Describe how to improve this scene. We will regenerate the current scene in AI Canvas.'
+                          : 'Describe what you want for this new scene. We will generate content directly in AI Canvas.')
+                        : 'Generate an interactive experience for this scene. Describe what kind of interaction you want.'}
                     </p>
 
                     <label className="mt-4 block text-sm font-medium text-slate-200" htmlFor="scene-type">
@@ -612,21 +621,27 @@ export default function ClassroomDetailPage() {
                       id="scene-type"
                       value={scenePromptType}
                       onChange={(e) => setScenePromptType(e.target.value as SceneType)}
-                      disabled={scenePromptGenerating}
+                      disabled={scenePromptGenerating || !canManageStudentsFromHeader}
                       className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-60"
                     >
-                      <option value="slide" className="bg-slate-900 text-white">
-                        Slide
-                      </option>
-                      <option value="quiz" className="bg-slate-900 text-white">
-                        Quiz
-                      </option>
+                      {canManageStudentsFromHeader && (
+                        <>
+                          <option value="slide" className="bg-slate-900 text-white">
+                            Slide
+                          </option>
+                          <option value="quiz" className="bg-slate-900 text-white">
+                            Quiz
+                          </option>
+                        </>
+                      )}
                       <option value="interactive" className="bg-slate-900 text-white">
                         Interactive
                       </option>
-                      <option value="pbl" className="bg-slate-900 text-white">
-                        Problem-Based Learning
-                      </option>
+                      {canManageStudentsFromHeader && (
+                        <option value="pbl" className="bg-slate-900 text-white">
+                          Problem-Based Learning
+                        </option>
+                      )}
                     </select>
 
                     <textarea

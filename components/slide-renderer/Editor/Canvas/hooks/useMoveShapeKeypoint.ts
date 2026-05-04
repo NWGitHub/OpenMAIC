@@ -31,13 +31,13 @@ export function useMoveShapeKeypoint(
   const moveShapeKeypoint = useCallback(
     (e: React.MouseEvent | React.TouchEvent, element: PPTShapeElement, index = 0) => {
       const native = e.nativeEvent;
-      const isTouchEvent = native instanceof TouchEvent;
+      const isTouchEvent = typeof TouchEvent !== 'undefined' && native instanceof TouchEvent;
       if (isTouchEvent && !native.changedTouches?.length) return;
 
       let isMouseDown = true;
 
-      const startPageX = isTouchEvent ? native.changedTouches[0].pageX : native.pageX;
-      const startPageY = isTouchEvent ? native.changedTouches[0].pageY : native.pageY;
+      const startPageX = isTouchEvent ? (native as TouchEvent).changedTouches[0].pageX : (native as MouseEvent).pageX;
+      const startPageY = isTouchEvent ? (native as TouchEvent).changedTouches[0].pageY : (native as MouseEvent).pageY;
 
       const originKeypoints = element.keypoints!;
 

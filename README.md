@@ -164,13 +164,135 @@ Or manually:
 3. Set environment variables (at minimum one LLM API key)
 4. Deploy
 
-### Docker Deployment
+### Docker Deployment (Ubuntu / any Linux)
+
+#### Prerequisites
 
 ```bash
-cp .env.example .env.local
-# Edit .env.local with your API keys, then:
-docker compose up --build
+# Docker Engine + Compose plugin (Ubuntu 22.04+)
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo tee /etc/apt/keyrings/docker.asc
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] \
+  https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
+  | sudo tee /etc/apt/sources.list.d/docker.list
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+sudo usermod -aG docker $USER   # log out & back in after this
 ```
+
+#### Start the stack
+
+```bash
+git clone https://github.com/THU-MAIC/OpenMAIC.git
+cd OpenMAIC
+cp .env.example .env.local
+# Edit .env.local — set AUTH_SECRET + at least one LLM provider key
+nano .env.local
+
+docker compose up --build -d
+```
+
+The stack starts three containers:
+- **db** — PostgreSQL 16
+- **migrate** — runs `prisma migrate deploy`, then exits
+- **openmaic** — the Next.js app on port 3000 (waits for migrate to finish)
+
+Check status: `docker compose ps` · Logs: `docker compose logs -f openmaic`
+
+#### Expose via nginx (optional)
+
+```nginx
+server {
+    listen 80;
+    server_name your.domain.com;
+
+    location / {
+        proxy_pass         http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade $http_upgrade;
+        proxy_set_header   Connection "upgrade";
+        proxy_set_header   Host $host;
+        proxy_set_header   X-Real-IP $remote_addr;
+        proxy_read_timeout 300s;
+    }
+}
+```
+
+```bash
+sudo apt-get install -y nginx
+sudo nano /etc/nginx/sites-available/openmaic   # paste config above
+sudo ln -s /etc/nginx/sites-available/openmaic /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+# Add TLS with: sudo apt install certbot python3-certbot-nginx && sudo certbot --nginx
+```
+
+#### Upgrade
+
+```bash
+git pull
+docker compose up --build -d
+```
+
+---
+
+### Bare-metal Deployment (Ubuntu / PM2)
+
+Use this if you prefer running the app directly on the host without Docker.
+
+#### Prerequisites
+
+```bash
+# Node.js 22 via NodeSource
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# pnpm + PM2
+sudo npm install -g pnpm@10 pm2
+
+# PostgreSQL
+sudo apt-get install -y postgresql postgresql-contrib
+sudo -u postgres psql -c "CREATE USER openmaic WITH PASSWORD 'changeme';"
+sudo -u postgres psql -c "CREATE DATABASE openmaic OWNER openmaic;"
+```
+
+#### Install & build
+
+```bash
+git clone https://github.com/THU-MAIC/OpenMAIC.git
+cd OpenMAIC
+pnpm install --frozen-lockfile
+
+cp .env.example .env.local
+# Set DATABASE_URL, AUTH_SECRET, and your LLM provider keys
+nano .env.local
+
+npx prisma migrate deploy
+pnpm build
+```
+
+#### Run with PM2
+
+```bash
+pm2 start node --name openmaic -- .next/standalone/server.js
+pm2 save
+pm2 startup   # follow the printed command to enable auto-start on reboot
+```
+
+Logs: `pm2 logs openmaic` · Restart: `pm2 restart openmaic`
+
+#### Upgrade
+
+```bash
+git pull
+pnpm install --frozen-lockfile
+npx prisma migrate deploy
+pnpm build
+pm2 restart openmaic
+```
+
+---
 
 ### Optional: MinerU (Advanced Document Parsing)
 

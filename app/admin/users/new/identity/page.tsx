@@ -36,23 +36,23 @@ export default function UserWizardIdentityPage() {
       <ValidationSummary errors={errors} />
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="name" className="text-slate-200">Full name</Label>
+          <Label htmlFor="name" className="text-slate-700 dark:text-slate-200">Full name</Label>
           <Input
             id="name"
             value={draft.name}
             onChange={(e) => setDraft({ name: e.target.value })}
             placeholder="Enter full name"
-            className="border-white/10 bg-black/20 text-white"
+            className="border-slate-300 dark:border-white/10 bg-white dark:bg-black/20 text-slate-900 dark:text-white"
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="email" className="text-slate-200">Email</Label>
+          <Label htmlFor="email" className="text-slate-700 dark:text-slate-200">Email</Label>
           <Input
             id="email"
             value={draft.email}
             onChange={(e) => setDraft({ email: e.target.value })}
             placeholder="name@example.com"
-            className="border-white/10 bg-black/20 text-white"
+            className="border-slate-300 dark:border-white/10 bg-white dark:bg-black/20 text-slate-900 dark:text-white"
           />
         </div>
       </div>

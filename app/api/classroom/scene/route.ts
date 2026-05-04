@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
     {
       id: classroom.id,
       stage: { ...classroom.stage, updatedAt: Date.now() },
-      scenes: updatedScenes,
+      scenes: updatedScenes as import('@/lib/types/stage').Scene[],
     },
     baseUrl,
   );
@@ -229,7 +229,7 @@ export async function PATCH(req: NextRequest) {
   };
 
   const updatedScenes = [...classroom.scenes];
-  updatedScenes[targetIndex] = updatedScene;
+  updatedScenes[targetIndex] = updatedScene as import('@/lib/types/stage').Scene;
 
   const baseUrl = buildRequestOrigin(req);
   await persistClassroom(

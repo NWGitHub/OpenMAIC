@@ -91,21 +91,21 @@ export default async function InstructorGradesPage({
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white"><I18nText k="instructorGradebook.title" fallback="Gradebook" /></h2>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white"><I18nText k="instructorGradebook.title" fallback="Gradebook" /></h2>
         <a
           href={`/api/instructor/classrooms/${classroomId}/grades/export`}
           download="grades.csv"
-          className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
+          className="rounded-lg border border-slate-300 dark:border-white/10 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white transition-colors"
         >
           <I18nText k="instructorGradebook.exportCsv" fallback="Export CSV" />
         </a>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-white/10">
+      <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-white/10">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-left text-xs uppercase tracking-wider text-slate-500">
-              <th className="px-4 py-3 sticky left-0 bg-slate-900 z-10"><I18nText k="instructorGradebook.student" fallback="Student" /></th>
+            <tr className="border-b border-slate-200 dark:border-white/10 text-left text-xs uppercase tracking-wider text-slate-500">
+              <th className="px-4 py-3 sticky left-0 bg-white dark:bg-slate-900 z-10"><I18nText k="instructorGradebook.student" fallback="Student" /></th>
               {scenes.map(([sceneId, title]) => (
                 <th key={sceneId} className="px-3 py-3 text-center min-w-[80px]">
                   <span className="block truncate max-w-[120px]" title={title}>{title}</span>
@@ -114,15 +114,15 @@ export default async function InstructorGradesPage({
               <th className="px-3 py-3 text-center"><I18nText k="instructorGradebook.total" fallback="Total" /></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5">
+          <tbody className="divide-y divide-slate-100 dark:divide-white/5">
             {students.map(([key, { label, userId }]) => {
               const studentResults = index.get(key) ?? new Map<string, QuizResultRow>();
               const total = Array.from(studentResults.values()).reduce((s, r) => s + r.score, 0);
               const maxTotal = Array.from(studentResults.values()).reduce((s, r) => s + r.maxScore, 0);
 
               return (
-                <tr key={key} className="hover:bg-white/4">
-                  <td className="px-4 py-3 sticky left-0 bg-slate-900 font-medium text-white">
+                <tr key={key} className="hover:bg-slate-50 dark:hover:bg-white/4">
+                  <td className="px-4 py-3 sticky left-0 bg-white dark:bg-slate-900 font-medium text-slate-900 dark:text-white">
                     {userId ? (
                       <Link
                         href={`/instructor/classrooms/${classroomId}/grades/${userId}`}
@@ -148,7 +148,7 @@ export default async function InstructorGradesPage({
                       </td>
                     );
                   })}
-                  <td className="px-3 py-3 text-center font-medium text-white">
+                  <td className="px-3 py-3 text-center font-medium text-slate-900 dark:text-white">
                     {maxTotal > 0 ? `${total}/${maxTotal}` : '—'}
                   </td>
                 </tr>

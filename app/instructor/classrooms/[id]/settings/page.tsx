@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useI18n } from '@/lib/hooks/use-i18n';
@@ -23,11 +24,13 @@ export default function InstructorSettingsPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { t } = useI18n();
+  const { data: session } = useSession();
   const classroomId = params.id;
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [ownerUserId, setOwnerUserId] = useState<string | null>(null);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -35,6 +38,9 @@ export default function InstructorSettingsPage() {
 
   const [confirmStep, setConfirmStep] = useState(false);
   const [confirmText, setConfirmText] = useState('');
+
+  // Only the actual owner may delete — not even admins browsing another instructor's settings
+  const isOwner = !!session?.user?.id && ownerUserId === session.user.id;
 
   const fetchClassroom = useCallback(async () => {
     setLoading(true);
@@ -45,6 +51,7 @@ export default function InstructorSettingsPage() {
       setTitle(data.classroom.stage.name || '');
       setDescription(data.classroom.stage.description || '');
       setLanguage((data.classroom.stage.language as 'en' | 'zh-CN' | 'th-TH') || 'en');
+      setOwnerUserId(data.classroom.stage.ownerUserId ?? null);
     } catch {
       toast.error(t('instructorClassroomSettings.loadFailed'));
     } finally {
@@ -123,11 +130,11 @@ export default function InstructorSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-white">{t('instructorClassroomSettings.title')}</h2>
+      <section className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('instructorClassroomSettings.title')}</h2>
 
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-200">
+          <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
             {t('instructorClassroomSettings.fields.title')} <span className="text-red-400">*</span>
           </label>
           <input
@@ -135,27 +142,27 @@ export default function InstructorSettingsPage() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             maxLength={200}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
+            className="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
           />
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-200">{t('instructorClassroomSettings.fields.description')}</label>
+          <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">{t('instructorClassroomSettings.fields.description')}</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             maxLength={2000}
             rows={4}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none resize-none"
+            className="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none resize-none"
           />
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-slate-200">{t('instructorClassroomSettings.fields.language')}</label>
+          <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">{t('instructorClassroomSettings.fields.language')}</label>
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value as 'en' | 'zh-CN' | 'th-TH')}
-            className="rounded-lg border border-white/10 bg-slate-800 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none"
+            className="rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-white focus:border-indigo-500 focus:outline-none"
           >
             <option value="en">{t('instructorClassroomSettings.languages.en')}</option>
             <option value="zh-CN">{t('instructorClassroomSettings.languages.zhCN')}</option>
@@ -173,6 +180,7 @@ export default function InstructorSettingsPage() {
         </button>
       </section>
 
+      {isOwner && (
       <section className="rounded-xl border border-red-500/30 bg-red-500/10 p-6 space-y-4">
         <h3 className="text-base font-semibold text-red-300 flex items-center gap-2">
           <AlertTriangle className="w-4 h-4" /> {t('instructorClassroomSettings.dangerZone')}
@@ -219,6 +227,7 @@ export default function InstructorSettingsPage() {
           </div>
         )}
       </section>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import {
@@ -12,6 +12,7 @@ import {
   Globe,
   AlertCircle,
   RefreshCw,
+  CheckCircle2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ThumbnailSlide } from '@/components/slide-renderer/components/ThumbnailSlide';
@@ -44,9 +45,37 @@ export function SceneSidebar({
   const homeUrl = session?.user?.role === 'INSTRUCTOR' ? '/instructor' : '/';
   const { scenes, currentSceneId, setCurrentSceneId, generatingOutlines, generationStatus } =
     useStageStore();
+  const stageId = useStageStore((s) => s.stage?.id ?? '');
   const failedOutlines = useStageStore.use.failedOutlines();
   const viewportSize = useCanvasStore.use.viewportSize();
   const viewportRatio = useCanvasStore.use.viewportRatio();
+
+  const isStudent = session?.user?.role === 'STUDENT';
+  const [completedSceneIds, setCompletedSceneIds] = useState<Set<string>>(new Set());
+
+  // Fetch scene progress for students
+  useEffect(() => {
+    if (!isStudent || !stageId) return;
+    fetch(`/api/scene-progress?classroomId=${encodeURIComponent(stageId)}`)
+      .then((r) => r.json())
+      .then((d) => {
+        const completed = new Set<string>(
+          (d.progress ?? []).filter((p: { completedAt: string | null }) => p.completedAt).map((p: { sceneId: string }) => p.sceneId),
+        );
+        setCompletedSceneIds(completed);
+      })
+      .catch(() => {});
+  }, [isStudent, stageId]);
+
+  // Track scene views for students
+  useEffect(() => {
+    if (!isStudent || !stageId || !currentSceneId || currentSceneId === PENDING_SCENE_ID) return;
+    fetch('/api/scene-progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ classroomId: stageId, sceneId: currentSceneId }),
+    }).catch(() => {});
+  }, [isStudent, stageId, currentSceneId]);
 
   const [retryingOutlineId, setRetryingOutlineId] = useState<string | null>(null);
 
@@ -147,6 +176,7 @@ export function SceneSidebar({
         >
           {scenes.map((scene, index) => {
             const isActive = currentSceneId === scene.id;
+            const isCompleted = completedSceneIds.has(scene.id);
             const Icon = getSceneTypeIcon(scene.type);
             const isSlide = scene.type === 'slide';
             const slideContent = isSlide ? (scene.content as SlideContent) : null;
@@ -171,7 +201,7 @@ export function SceneSidebar({
               >
                 {/* Scene Header */}
                 <div className="flex justify-between items-center px-2 pt-0.5">
-                  <div className="flex items-center gap-2 max-w-full">
+                  <div className="flex items-center gap-2 max-w-full min-w-0">
                     <span
                       className={cn(
                         'text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shrink-0',
@@ -185,7 +215,7 @@ export function SceneSidebar({
                     <span
                       data-testid="scene-title"
                       className={cn(
-                        'text-xs font-bold truncate transition-colors',
+                        'text-xs font-bold truncate transition-colors flex-1',
                         isActive
                           ? 'text-purple-700 dark:text-purple-300'
                           : 'text-gray-600 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100',
@@ -194,6 +224,9 @@ export function SceneSidebar({
                       {scene.title}
                     </span>
                   </div>
+                  {isStudent && isCompleted && (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 ml-1" />
+                  )}
                 </div>
 
                 {/* Thumbnail */}

@@ -54,10 +54,10 @@ export function VariableReference({ onVariableClick }: VariableReferenceProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="rounded-lg border border-white/10 bg-white/5 p-4">
+    <div className="rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full text-sm font-medium text-white hover:text-slate-100"
+        className="flex items-center justify-between w-full text-sm font-medium text-slate-900 dark:text-white hover:text-slate-700 dark:hover:text-slate-100"
       >
         <span>Available Variables</span>
         <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -68,21 +68,21 @@ export function VariableReference({ onVariableClick }: VariableReferenceProps) {
           {AVAILABLE_VARIABLES.map((variable) => (
             <div
               key={variable.name}
-              className="p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-colors"
+              className="p-3 rounded-lg bg-white dark:bg-white/5 border border-slate-200 dark:border-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
             >
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <code className="text-xs font-mono text-purple-400">
+                  <code className="text-xs font-mono text-purple-600 dark:text-purple-400">
                     {`{{${variable.name}}}`}
                   </code>
-                  <p className="text-xs text-slate-400 mt-1">{variable.description}</p>
-                  <p className="text-xs text-slate-500 mt-1">Example: {variable.example}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{variable.description}</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Example: {variable.example}</p>
                 </div>
                 {onVariableClick && (
                   <button
                     type="button"
                     onClick={() => onVariableClick(variable.name)}
-                    className="px-2 py-1 rounded text-xs bg-purple-600/20 text-purple-300 hover:bg-purple-600/30 whitespace-nowrap"
+                    className="px-2 py-1 rounded text-xs bg-purple-100 dark:bg-purple-600/20 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-600/30 whitespace-nowrap"
                   >
                     Insert
                   </button>

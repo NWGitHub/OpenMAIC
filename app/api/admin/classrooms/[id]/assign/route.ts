@@ -8,6 +8,11 @@ const assignSchema = z.object({
   userIds: z.array(z.string()).min(1),
 });
 
+async function authorizeClassroom(session: { user: { id: string; role: string } }, classroomId: string) {
+  if (session.user.role === 'ADMIN') return true;
+  return userOwnsClassroom(session.user.id, classroomId);
+}
+
 /** GET /api/admin/classrooms/[id]/assign — list assigned students */
 export async function GET(
   _req: NextRequest,
@@ -15,14 +20,13 @@ export async function GET(
 ) {
   let session;
   try {
-    session = await requireRole('INSTRUCTOR');
+    session = await requireRole('INSTRUCTOR', 'ADMIN');
   } catch {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const { id: classroomId } = await params;
-  const owns = await userOwnsClassroom(session.user.id, classroomId);
-  if (!owns) {
+  if (!await authorizeClassroom(session, classroomId)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -40,14 +44,13 @@ export async function POST(
 ) {
   let session;
   try {
-    session = await requireRole('INSTRUCTOR');
+    session = await requireRole('INSTRUCTOR', 'ADMIN');
   } catch {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const { id: classroomId } = await params;
-  const owns = await userOwnsClassroom(session.user.id, classroomId);
-  if (!owns) {
+  if (!await authorizeClassroom(session, classroomId)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
@@ -86,14 +89,13 @@ export async function DELETE(
 ) {
   let session;
   try {
-    session = await requireRole('INSTRUCTOR');
+    session = await requireRole('INSTRUCTOR', 'ADMIN');
   } catch {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const { id: classroomId } = await params;
-  const owns = await userOwnsClassroom(session.user.id, classroomId);
-  if (!owns) {
+  if (!await authorizeClassroom(session, classroomId)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 

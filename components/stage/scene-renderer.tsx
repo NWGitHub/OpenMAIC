@@ -13,6 +13,10 @@ interface SceneRendererProps {
 }
 
 export function SceneRenderer({ scene, mode }: SceneRendererProps) {
+  // Sub-renderers for non-slide scenes only understand 'autonomous' | 'playback'.
+  // Map 'instructor-edit' (slide-only concept) to 'playback' for those renderers.
+  const subMode = mode === 'instructor-edit' ? 'playback' : mode;
+
   const renderer = useMemo(() => {
     switch (scene.type) {
       case 'slide':
@@ -23,14 +27,14 @@ export function SceneRenderer({ scene, mode }: SceneRendererProps) {
         return <QuizView key={scene.id} questions={scene.content.questions} sceneId={scene.id} />;
       case 'interactive':
         if (scene.content.type !== 'interactive') return <div>Invalid interactive content</div>;
-        return <InteractiveRenderer content={scene.content} mode={mode} sceneId={scene.id} />;
+        return <InteractiveRenderer content={scene.content} mode={subMode} sceneId={scene.id} />;
       case 'pbl':
         if (scene.content.type !== 'pbl') return <div>Invalid PBL content</div>;
-        return <PBLRenderer content={scene.content} mode={mode} sceneId={scene.id} />;
+        return <PBLRenderer content={scene.content} mode={subMode} sceneId={scene.id} />;
       default:
         return <div>Unknown scene type</div>;
     }
-  }, [scene, mode]);
+  }, [scene, mode, subMode]);
 
   return <div className="w-full h-full">{renderer}</div>;
 }

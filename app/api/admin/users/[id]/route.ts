@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/auth/prisma';
 import { requireRole, writeAuditLog } from '@/lib/auth/helpers';
+import { invalidateUserFieldsCache } from '@/lib/auth/auth';
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
@@ -69,6 +70,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       data: updateData,
       select: { id: true, name: true, email: true, studentId: true, role: true, isActive: true },
     });
+
+    invalidateUserFieldsCache(id);
 
     void writeAuditLog({
       actorId: session.user.id,

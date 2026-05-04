@@ -122,6 +122,7 @@ export function PBLRenderer({ content, mode: _mode, sceneId }: PBLRendererProps)
     <PBLWorkspace
       projectConfig={projectConfig}
       userRole={selectedRole}
+      sceneId={sceneId}
       onConfigUpdate={updateConfig}
       onReset={handleReset}
     />

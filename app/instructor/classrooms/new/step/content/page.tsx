@@ -34,7 +34,7 @@ export default function ContentPage() {
     >
       <div className="space-y-6">
         <div>
-          <h2 className="text-lg font-semibold text-white">Content</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Content</h2>
           <p className="mt-1 text-sm text-slate-400">
             Slides and scenes are imported into your classroom after creation through the AI
             generation canvas.
@@ -43,12 +43,12 @@ export default function ContentPage() {
 
         <div className="rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-5 flex gap-4">
           <Info className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-slate-300 space-y-2">
-            <p className="font-medium text-white">How to add content</p>
-            <ol className="list-decimal list-inside space-y-1 text-slate-400">
+          <div className="text-sm text-slate-600 dark:text-slate-300 space-y-2">
+            <p className="font-medium text-slate-900 dark:text-white">How to add content</p>
+            <ol className="list-decimal list-inside space-y-1 text-slate-500 dark:text-slate-400">
               <li>Create the classroom first (complete this wizard).</li>
               <li>
-                Open the classroom in the <strong className="text-slate-200">AI Canvas</strong> —
+                Open the classroom in the <strong className="text-slate-700 dark:text-slate-200">AI Canvas</strong> —
                 use the <em>Manage</em> button from the Classrooms list.
               </li>
               <li>Generate or import slides; the canvas will sync them here automatically.</li>
@@ -60,8 +60,8 @@ export default function ContentPage() {
         </div>
 
         {title && (
-          <div className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
-            Classroom: <span className="font-medium text-white">{title}</span>
+          <div className="rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
+            Classroom: <span className="font-medium text-slate-900 dark:text-white">{title}</span>
           </div>
         )}
       </div>

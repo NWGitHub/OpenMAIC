@@ -55,7 +55,7 @@ export function PermissionMatrix({ selectedPermissions, onChange, disabled }: Pe
         const allSelected = perms.every(([key]) => selectedPermissions.includes(key));
 
         return (
-          <div key={categoryKey} className="rounded-lg border border-white/10 bg-white/5 p-4">
+          <div key={categoryKey} className="rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-4">
             <div className="mb-3 flex items-center gap-2">
               <input
                 ref={(el) => {
@@ -70,7 +70,7 @@ export function PermissionMatrix({ selectedPermissions, onChange, disabled }: Pe
               />
               <label
                 htmlFor={`category-${categoryKey}`}
-                className="text-sm font-semibold text-white cursor-pointer disabled:opacity-50"
+                className="text-sm font-semibold text-slate-900 dark:text-white cursor-pointer disabled:opacity-50"
               >
                 {category.label}
               </label>
@@ -89,7 +89,7 @@ export function PermissionMatrix({ selectedPermissions, onChange, disabled }: Pe
                   />
                   <label
                     htmlFor={`perm-${permKey}`}
-                    className="text-sm text-slate-300 cursor-pointer disabled:opacity-50"
+                    className="text-sm text-slate-700 dark:text-slate-300 cursor-pointer disabled:opacity-50"
                   >
                     {permLabel}
                   </label>

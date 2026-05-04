@@ -48,6 +48,7 @@ export function CanvasArea({
 }: CanvasAreaProps) {
   const { t } = useI18n();
   const showControls = mode === 'playback' && !whiteboardOpen;
+  const isInstructorEdit = mode === 'instructor-edit';
   const showPlayHint =
     showControls &&
     engineState !== 'playing' &&
@@ -57,7 +58,7 @@ export function CanvasArea({
 
   const handleSlideClick = useCallback(
     (e: React.MouseEvent) => {
-      if (!showControls || isLiveSession || currentScene?.type !== 'slide') return;
+      if (isInstructorEdit || !showControls || isLiveSession || currentScene?.type !== 'slide') return;
       // Don't trigger page play/pause when clicking inside a video element's visual area.
       // Video elements may be visually covered by other slide elements (e.g. text),
       // so we check click coordinates against all video element bounding rects.
@@ -93,7 +94,7 @@ export function CanvasArea({
         <div
           className={cn(
             'aspect-[16/9] h-full max-h-full max-w-full bg-white dark:bg-gray-800 shadow-2xl rounded-lg overflow-hidden relative transition-all duration-700',
-            showControls && !isLiveSession && currentScene?.type === 'slide' && 'cursor-pointer',
+            showControls && !isLiveSession && !isInstructorEdit && currentScene?.type === 'slide' && 'cursor-pointer',
             currentScene?.type === 'interactive'
               ? 'shadow-blue-200/50 dark:shadow-blue-900/50 ring-1 ring-blue-900/5 dark:ring-blue-500/10'
               : 'shadow-gray-200/50 dark:shadow-gray-800/50 ring-1 ring-gray-950/5 dark:ring-white/5',

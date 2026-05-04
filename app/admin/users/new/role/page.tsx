@@ -36,12 +36,12 @@ export default function UserWizardRolePage() {
       <ValidationSummary errors={errors} />
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="role" className="text-slate-200">Role</Label>
+          <Label htmlFor="role" className="text-slate-700 dark:text-slate-200">Role</Label>
           <select
             id="role"
             value={draft.role}
             onChange={(e) => setDraft({ role: e.target.value as 'ADMIN' | 'INSTRUCTOR' | 'STUDENT' })}
-            className="h-9 w-full rounded-md border border-white/10 bg-black/20 px-3 text-sm text-white outline-none"
+            className="h-9 w-full rounded-md border border-slate-300 dark:border-white/10 bg-white dark:bg-black/20 px-3 text-sm text-slate-900 dark:text-white outline-none"
           >
             <option value="STUDENT">Student</option>
             <option value="INSTRUCTOR">Instructor</option>
@@ -49,7 +49,7 @@ export default function UserWizardRolePage() {
           </select>
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="studentId" className="text-slate-200">
+          <Label htmlFor="studentId" className="text-slate-700 dark:text-slate-200">
             Student ID {draft.role === 'STUDENT' ? '*' : '(optional)'}
           </Label>
           <Input
@@ -57,7 +57,7 @@ export default function UserWizardRolePage() {
             value={draft.studentId}
             onChange={(e) => setDraft({ studentId: e.target.value })}
             placeholder={draft.role === 'STUDENT' ? 'STU-2026-001' : 'Not required for this role'}
-            className="border-white/10 bg-black/20 text-white"
+            className="border-slate-300 dark:border-white/10 bg-white dark:bg-black/20 text-slate-900 dark:text-white"
           />
         </div>
       </div>

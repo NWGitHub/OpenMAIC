@@ -3,7 +3,11 @@
     "you": "You",
     "confirm": "Confirm",
     "cancel": "Cancel",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next"
+    }
   },
   "home": {
     "slogan": "Generative Learning in Multi-Agent Interactive Classroom",
@@ -117,7 +121,8 @@
     "confirmSwitchMessage": "A topic is currently in progress. Switching scenes will end the current topic. Are you sure?",
     "generatingNextPage": "Scene is being generated, please wait...",
     "fullscreen": "Fullscreen",
-    "exitFullscreen": "Exit Fullscreen"
+    "exitFullscreen": "Exit Fullscreen",
+    "interactiveMode": "Interactive"
   },
   "whiteboard": {
     "title": "Interactive Whiteboard",
@@ -270,7 +275,18 @@
     "delete": "Delete",
     "rename": "Rename",
     "renamePlaceholder": "Enter classroom name",
-    "renameFailed": "Failed to rename classroom"
+    "renameFailed": "Failed to rename classroom",
+    "enrolledClassrooms": "Enrolled Classrooms",
+    "scenesCompleted": "Scenes Completed",
+    "newAssignments": "New Assignments",
+    "newAssignmentBanner": "New assignment",
+    "noInvitedClassrooms": "No classrooms assigned yet. Ask your instructor for an invite.",
+    "progress": "Progress",
+    "grades": "Grades",
+    "continue": "Continue",
+    "start": "Start",
+    "open": "Open",
+    "scenes": "scenes"
   },
   "upload": {
     "pdfSizeLimit": "Supports PDF files up to 50MB",
@@ -1079,6 +1095,46 @@
     "created": "created",
     "manage": "Manage"
   },
+  "studentDashboard": {
+    "title": "Student Dashboard",
+    "welcomeBack": "Welcome back,",
+    "taskMenu": "Quick Actions",
+    "taskMenuDescription": "Jump to your main learning activities.",
+    "taskDashboard": "My Dashboard",
+    "taskDashboardSub": "enrolled classrooms",
+    "taskMyClassrooms": "My Classrooms",
+    "taskMyClassroomsSubNew": "{{count}} new assignment",
+    "taskMyClassroomsSubNewPlural": "{{count}} new assignments",
+    "taskMyClassroomsSubNone": "All up to date",
+    "taskMyProgress": "My Progress",
+    "taskMyProgressSub": "of {{total}} scenes",
+    "taskSettings": "My Profile",
+    "taskSettingsSub": "View and edit your profile",
+    "backToDashboard": "Back to Dashboard",
+    "classroomsViewTitle": "My Classrooms",
+    "createClassroomTitle": "Create a New Classroom",
+    "createClassroomDesc": "Describe your learning topic and let AI generate your classroom",
+    "invitedSectionTitle": "Enrolled Classrooms",
+    "ownedSectionTitle": "My Created Classrooms",
+    "noOwnedClassrooms": "You haven't created any classrooms yet.",
+    "pageOf": "Page {{page}} of {{total}}",
+    "progressViewTitle": "My Progress",
+    "overallSummary": "Overall Summary",
+    "overallScore": "Overall Score",
+    "sceneProgressLabel": "Scene Progress",
+    "quizPerformanceLabel": "Quiz Performance",
+    "noQuizResults": "No quiz results yet",
+    "loadingGrades": "Loading grades...",
+    "quizResultCount": "{{count}} result",
+    "quizResultCountPlural": "{{count}} results",
+    "profileViewTitle": "My Profile",
+    "displayPreferences": "Display Preferences",
+    "aiNickname": "AI Nickname",
+    "aiNicknameDesc": "Name shown during AI-generated classroom sessions",
+    "avatarSelect": "Choose your avatar",
+    "savePreferences": "Save Preferences",
+    "preferencesSaved": "Preferences saved."
+  },
   "instructorClassrooms": {
     "title": "Classrooms",
     "newClassroom": "New Classroom",
@@ -1290,7 +1346,7 @@
     "assigned": "{{count}} student(s) assigned",
     "removeFailed": "Failed to remove student",
     "removed": "Student removed",
-    "searchPlaceholder": "Search students\u2026",
+    "searchPlaceholder": "Search students…",
     "addStudent": "Add Student",
     "emptyTitle": "No students enrolled",
     "emptyDesc": "Use the Add Student button to enroll students in this classroom.",
@@ -1308,8 +1364,8 @@
     "removeAriaLabel": "Remove student",
     "addPanelTitle": "Add Students",
     "addPanelHint": "Search existing user accounts to enroll them in this classroom.",
-    "addPanelSearchPlaceholder": "Search by name or email\u2026",
-    "searching": "Searching\u2026",
+    "addPanelSearchPlaceholder": "Search by name or email…",
+    "searching": "Searching…",
     "enrollCount": "Enroll {{count}} student(s)"
   },
   "instructorClassroomContent": {
@@ -1322,7 +1378,7 @@
     "title": "Content",
     "scenesCount": "scenes",
     "addScene": "Add Scene in AI Canvas",
-    "savingOrder": "Saving order\u2026",
+    "savingOrder": "Saving order…",
     "noScenes": "No scenes yet. Use Add Scene in AI Canvas to create your first one.",
     "untitled": "(untitled)",
     "moveUp": "Move up",
@@ -1342,8 +1398,8 @@
     },
     "languages": {
       "en": "English",
-      "zhCN": "\u4e2d\u6587 (Simplified)",
-      "thTH": "\u0e20\u0e32\u0e29\u0e32\u0e44\u0e17\u0e22 (Thai)"
+      "zhCN": "中文 (Simplified)",
+      "thTH": "ภาษาไทย (Thai)"
     },
     "basics": {
       "stepLabel": "Step 1 of 5",
@@ -1351,7 +1407,7 @@
       "sectionTitle": "Classroom basics",
       "sectionDesc": "Give your classroom a name and a brief description. You can change these later.",
       "titleLabel": "Title",
-      "titlePlaceholder": "e.g. Introduction to Physics \u2014 Spring 2026",
+      "titlePlaceholder": "e.g. Introduction to Physics — Spring 2026",
       "titleRequired": "Title is required to continue.",
       "descriptionLabel": "Description",
       "descriptionPlaceholder": "Optional: describe what students will learn in this classroom.",
@@ -1362,10 +1418,10 @@
       "back": "Back: Content",
       "next": "Next: Schedule",
       "sectionTitle": "Enroll students",
-      "sectionDesc": "Add students now or skip \u2014 you can always add them later from the Students tab.",
+      "sectionDesc": "Add students now or skip — you can always add them later from the Students tab.",
       "searchLabel": "Search existing users",
-      "searchPlaceholder": "Search by name or email\u2026",
-      "searching": "Searching\u2026",
+      "searchPlaceholder": "Search by name or email…",
+      "searching": "Searching…",
       "linkedTo": "Linked to:",
       "orAddManually": "Or add manually",
       "nameField": "Name",
@@ -1380,7 +1436,7 @@
       "stepLabel": "Step 5 of 5",
       "back": "Back: Schedule",
       "createBtn": "Create Classroom",
-      "creating": "Creating\u2026",
+      "creating": "Creating…",
       "sectionTitle": "Review & create",
       "sectionDesc": "Confirm the details below, then click Create Classroom.",
       "rowTitle": "Title",
@@ -1397,7 +1453,8 @@
       "enrollFailed": "Classroom created, but failed to enroll linked students",
       "manualEnrollFailed": "Classroom created, but {{count}} manual student account(s) need follow-up in Students tab",
       "created": "Classroom created!",
-      "unexpectedError": "An unexpected error occurred"
+      "unexpectedError": "An unexpected error occurred",
+      "backToClassroom": "Back to Classroom"
     },
     "schedule": {
       "stepLabel": "Step 4 of 5",
@@ -1410,6 +1467,50 @@
       "scheduled": "Scheduled",
       "startDateLabel": "Start date (optional)",
       "endDateLabel": "End date (optional)"
+    }
+  },
+  "generateScenes": {
+    "title": "Generate Scenes",
+    "subtitle": "Create AI-generated learning scenes for {{name}}",
+    "forClassroom": "For Classroom",
+    "promptLabel": "What should this classroom teach?",
+    "promptHint": "Describe the topic, learning goals, or paste your curriculum outline.",
+    "promptPlaceholder": "e.g. Introduction to Newton's Laws of Motion for high school students…",
+    "generating": "Generating…",
+    "generateBtn": "Generate Scenes",
+    "setupModel": "Set up a model",
+    "tip": "Tip: Press ⌘ + Enter to start generation"
+  },
+  "canvas": {
+    "contextMenu": {
+      "cut": "Cut",
+      "copy": "Copy",
+      "paste": "Paste",
+      "selectAll": "Select All",
+      "delete": "Delete",
+      "lock": "Lock",
+      "unlock": "Unlock",
+      "setLink": "Set Link",
+      "group": "Group",
+      "ungroup": "Ungroup",
+      "ruler": "Ruler",
+      "gridLines": "Grid Lines",
+      "gridNone": "None",
+      "gridSmall": "Small",
+      "gridMedium": "Medium",
+      "gridLarge": "Large",
+      "resetPage": "Reset Page",
+      "alignHorizontal": "Align Horizontally",
+      "alignVertical": "Align Vertically",
+      "alignCenter": "Center Both",
+      "alignLeft": "Align Left",
+      "alignRight": "Align Right",
+      "alignTop": "Align Top",
+      "alignBottom": "Align Bottom",
+      "bringToFront": "Bring to Front",
+      "bringForward": "Bring Forward",
+      "sendToBack": "Send to Back",
+      "sendBackward": "Send Backward"
     }
   },
   "media": {
@@ -1426,5 +1527,21 @@
     "voice": "Voice",
     "speed": "Speed",
     "language": "Language"
+  },
+  "signIn": {
+    "title": "Sign in to your account",
+    "emailLabel": "Email address",
+    "passwordLabel": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "signingIn": "Signing in…",
+    "submit": "Sign in",
+    "orContinueWith": "or continue with",
+    "pdpaNotice": "Protected by Thailand PDPA. By signing in, you agree to our data practices.",
+    "errors": {
+      "CredentialsSignin": "Invalid email or password.",
+      "AccountDisabled": "Your account has been disabled. Contact your administrator.",
+      "Default": "Sign in failed. Please try again."
+    }
   }
 }

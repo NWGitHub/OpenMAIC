@@ -79,16 +79,16 @@ export function ClassroomAssignPanel({ classroomId }: ClassroomAssignPanelProps)
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Assigned students */}
       <div>
-        <h3 className="text-white font-medium mb-3 text-sm">Assigned Students ({assigned.length})</h3>
-        <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+        <h3 className="text-slate-900 dark:text-white font-medium mb-3 text-sm">Assigned Students ({assigned.length})</h3>
+        <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden">
           {assigned.length === 0 ? (
             <p className="text-slate-500 text-sm p-4">No students assigned yet.</p>
           ) : (
-            <ul className="divide-y divide-white/5">
+            <ul className="divide-y divide-slate-100 dark:divide-white/5">
               {assigned.map((a) => (
                 <li key={a.id} className="flex items-center justify-between px-4 py-3">
                   <div>
-                    <p className="text-white text-sm font-medium">{a.user.name ?? '—'}</p>
+                    <p className="text-slate-900 dark:text-white text-sm font-medium">{a.user.name ?? '—'}</p>
                     <p className="text-slate-500 text-xs">{a.user.email}</p>
                   </div>
                   <button
@@ -107,7 +107,7 @@ export function ClassroomAssignPanel({ classroomId }: ClassroomAssignPanelProps)
 
       {/* Add students */}
       <div>
-        <h3 className="text-white font-medium mb-3 text-sm">Add Students</h3>
+        <h3 className="text-slate-900 dark:text-white font-medium mb-3 text-sm">Add Students</h3>
         <div className="relative mb-3">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
@@ -115,14 +115,14 @@ export function ClassroomAssignPanel({ classroomId }: ClassroomAssignPanelProps)
             placeholder="Search students…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full pl-9 pr-3 py-2 rounded-lg bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden mb-3">
+        <div className="bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden mb-3">
           {unassigned.length === 0 ? (
             <p className="text-slate-500 text-sm p-4">No students available to add.</p>
           ) : (
-            <ul className="divide-y divide-white/5 max-h-56 overflow-y-auto">
+            <ul className="divide-y divide-slate-100 dark:divide-white/5 max-h-56 overflow-y-auto">
               {unassigned.map((u) => (
                 <li key={u.id} className="flex items-center gap-3 px-4 py-2.5">
                   <input
@@ -136,7 +136,7 @@ export function ClassroomAssignPanel({ classroomId }: ClassroomAssignPanelProps)
                     className="w-4 h-4 accent-purple-500"
                   />
                   <div>
-                    <p className="text-white text-sm">{u.name ?? '—'}</p>
+                    <p className="text-slate-900 dark:text-white text-sm">{u.name ?? '—'}</p>
                     <p className="text-slate-500 text-xs">{u.email}</p>
                   </div>
                 </li>

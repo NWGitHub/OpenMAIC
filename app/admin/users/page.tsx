@@ -22,9 +22,9 @@ interface UserRow {
 }
 
 const ROLE_COLORS: Record<Role, string> = {
-  ADMIN: 'bg-red-500/15 text-red-400',
-  INSTRUCTOR: 'bg-emerald-500/15 text-emerald-400',
-  STUDENT: 'bg-blue-500/15 text-blue-400',
+  ADMIN: 'bg-red-100 dark:bg-red-500/15 text-red-700 dark:text-red-400',
+  INSTRUCTOR: 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
+  STUDENT: 'bg-blue-100 dark:bg-blue-500/15 text-blue-700 dark:text-blue-400',
 };
 
 export default function UsersPage() {
@@ -152,7 +152,7 @@ export default function UsersPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${u.isActive ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'}`}>
+                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${u.isActive ? 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400' : 'bg-red-100 dark:bg-red-500/15 text-red-700 dark:text-red-400'}`}>
                       {u.isActive ? t('adminUsers.status.active') : t('adminUsers.status.disabled')}
                     </span>
                   </td>

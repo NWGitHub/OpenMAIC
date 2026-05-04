@@ -16,6 +16,8 @@ import {
   Type,
   Users,
   Sparkles,
+  Zap,
+  Pencil,
 } from 'lucide-react';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { useTheme } from '@/lib/hooks/use-theme';
@@ -30,11 +32,13 @@ import { useMediaGenerationStore } from '@/lib/store/media-generation';
 import { useExportPPTX } from '@/lib/export/use-export-pptx';
 import { useSession, signOut } from 'next-auth/react';
 import { PENDING_SCENE_ID } from '@/lib/store/stage';
+import { createDefaultSlideContent } from '@/lib/api/stage-api-defaults';
+import { MuBrandingHeader } from '@/components/mu-branding-header';
 
 const FONT_SIZES = [
-  { label: 'Small', value: 14 },
-  { label: 'Default', value: 16 },
-  { label: 'Large', value: 18 },
+  { label: 'Small', value: 16 },
+  { label: 'Default', value: 18 },
+  { label: 'Large', value: 20 },
 ] as const;
 
 const FONT_SIZE_KEY = 'openmaic-ui-font-size';
@@ -62,15 +66,15 @@ export function Header({ currentSceneTitle }: HeaderProps) {
   const [prefOpen, setPrefOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [studentsOpen, setStudentsOpen] = useState(false);
-  const [fontSize, setFontSize] = useState<number>(16);
+  const [fontSize, setFontSize] = useState<number>(18);
   const prefRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const studentsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem(FONT_SIZE_KEY);
-    const parsed = saved ? Number(saved) : 16;
-    const next = Number.isFinite(parsed) && [14, 16, 18].includes(parsed) ? parsed : 16;
+    const parsed = saved ? Number(saved) : 18;
+    const next = Number.isFinite(parsed) && [16, 18, 20].includes(parsed) ? parsed : 18;
     setFontSize(next);
     applyRootFontSize(next);
   }, []);
@@ -86,6 +90,8 @@ export function Header({ currentSceneTitle }: HeaderProps) {
   const exportRef = useRef<HTMLDivElement>(null);
   const scenes = useStageStore((s) => s.scenes);
   const currentSceneId = useStageStore((s) => s.currentSceneId);
+  const stageMode = useStageStore((s) => s.mode);
+  const setStageMode = useStageStore((s) => s.setMode);
   const generatingOutlines = useStageStore((s) => s.generatingOutlines);
   const failedOutlines = useStageStore((s) => s.failedOutlines);
   const mediaTasks = useMediaGenerationStore((s) => s.tasks);
@@ -123,6 +129,14 @@ export function Header({ currentSceneTitle }: HeaderProps) {
   }, [exportMenuOpen, userMenuOpen, prefOpen, studentsOpen, handleClickOutside]);
 
   const canEditScenePrompt = !!currentSceneId && currentSceneId !== PENDING_SCENE_ID;
+  const currentScene = scenes.find((s) => s.id === currentSceneId) ?? null;
+  const isSlideScene = currentScene?.type === 'slide';
+  const isInteractiveScene = currentScene?.type === 'interactive';
+  const isInstructorEditMode = stageMode === 'instructor-edit';
+
+  const toggleSlideEditMode = useCallback(() => {
+    setStageMode(isInstructorEditMode ? 'playback' : 'instructor-edit');
+  }, [isInstructorEditMode, setStageMode]);
   const inScenePromptFlow =
     searchParams.get('newScenePrompt') === '1' || searchParams.get('editScenePrompt') === '1';
   const cameFromContent = searchParams.get('from') === 'content';
@@ -146,9 +160,29 @@ export function Header({ currentSceneTitle }: HeaderProps) {
     router.push(`${pathname}?${params.toString()}`);
   }, [canEditScenePrompt, currentSceneId, pathname, router, searchParams]);
 
+  const toggleInteractiveType = useCallback(async () => {
+    if (!canEditScenePrompt || !currentSceneId || !currentScene || !classroomId) return;
+    const newType = isInteractiveScene ? 'slide' : 'interactive';
+    const newContent = newType === 'interactive'
+      ? { type: 'interactive' as const, url: '' }
+      : createDefaultSlideContent();
+    // Optimistic local update
+    useStageStore.getState().updateScene(currentSceneId, { type: newType, content: newContent as never });
+    try {
+      await fetch('/api/classroom/scene', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ classroomId, sceneId: currentSceneId, type: newType, content: newContent }),
+      });
+    } catch {
+      // Revert on network error
+      useStageStore.getState().updateScene(currentSceneId, { type: currentScene.type, content: currentScene.content as never });
+    }
+  }, [canEditScenePrompt, currentSceneId, currentScene, classroomId, isInteractiveScene]);
+
   return (
     <>
-      <header className="h-14 px-3 sm:h-20 sm:px-8 flex items-center justify-between z-10 bg-transparent gap-2 sm:gap-4">
+      <header className="h-14 px-3 sm:h-20 sm:px-8 flex items-center justify-between z-10 bg-transparent gap-2 sm:gap-4 relative">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <button
             onClick={handleBack}
@@ -170,17 +204,31 @@ export function Header({ currentSceneTitle }: HeaderProps) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md px-2 py-1.5 rounded-full border border-gray-100/50 dark:border-gray-700/50 shadow-sm shrink-0 max-w-[calc(100vw-5rem)] overflow-x-auto">
+        {/* ── MU-OpenMAIC branding — centred, students only, not in classroom scenes ── */}
+        {!canManageStudents && !classroomId && (
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+            <MuBrandingHeader large />
+          </div>
+        )}
+
+        {/* ── Pill toolbar ──────────────────────────────────────────────────────
+             The outer wrapper has NO overflow property so that dropdowns
+             (Language, Preferences, Student Management, Avatar) can extend
+             below the pill without being clipped.  Only the inner action-
+             button strip uses overflow-x-auto for narrow-screen scrolling. */}
+        <div className="relative flex items-center bg-white/60 dark:bg-gray-800/60 backdrop-blur-md py-1.5 rounded-full border border-gray-100/50 dark:border-gray-700/50 shadow-sm shrink-0">
+
+          {/* ── Scrollable action buttons (no dropdowns) ── */}
           {canManageStudents && (
-            <>
+            <div className="flex items-center gap-2 pl-2 overflow-x-auto max-w-[50vw] sm:max-w-none">
               <button
                 onClick={openScenePromptEditor}
                 disabled={!canEditScenePrompt}
                 className={cn(
-                  'h-9 rounded-full px-3 text-xs font-semibold transition-all flex items-center gap-1.5',
+                  'h-9 rounded-full px-3 text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0',
                   canEditScenePrompt
                     ? 'text-purple-700 dark:text-purple-300 bg-purple-100/80 dark:bg-purple-900/35 hover:bg-purple-200/90 dark:hover:bg-purple-900/55 cursor-pointer'
-                    : 'text-gray-300 dark:text-gray-600 bg-gray-100/70 dark:bg-gray-800/70 cursor-not-allowed',
+                    : 'text-gray-400 dark:text-gray-600 bg-gray-100/70 dark:bg-gray-800/70 cursor-not-allowed',
                 )}
                 title="Edit current scene with prompt"
               >
@@ -188,14 +236,59 @@ export function Header({ currentSceneTitle }: HeaderProps) {
                 <span>Edit Prompt</span>
               </button>
 
-              <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700" />
-            </>
+              <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700 shrink-0" />
+
+              {/* Edit Slide — only for slide scenes */}
+              {isSlideScene && canEditScenePrompt && (
+                <>
+                  <button
+                    onClick={toggleSlideEditMode}
+                    className={cn(
+                      'h-9 rounded-full px-3 text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0',
+                      isInstructorEditMode
+                        ? 'text-amber-700 dark:text-amber-300 bg-amber-100/80 dark:bg-amber-900/35 border border-amber-400/60 dark:border-amber-500/40 cursor-pointer'
+                        : 'text-gray-600 dark:text-gray-300 bg-gray-100/80 dark:bg-gray-800/60 border border-gray-200/60 dark:border-white/10 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 cursor-pointer',
+                    )}
+                    title={isInstructorEditMode ? 'Exit slide edit mode' : 'Edit slide layout'}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                    <span>{isInstructorEditMode ? 'Done Editing' : 'Edit Slide'}</span>
+                  </button>
+                  <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700 shrink-0" />
+                </>
+              )}
+
+              {/* Interactive — scene-type toggle */}
+              {stageId && (
+                <>
+                  <button
+                    onClick={() => void toggleInteractiveType()}
+                    disabled={!canEditScenePrompt}
+                    className={cn(
+                      'h-9 rounded-full px-3 text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0',
+                      !canEditScenePrompt
+                        ? 'text-gray-400 dark:text-gray-600 bg-gray-100/70 dark:bg-gray-800/70 border border-transparent cursor-not-allowed'
+                        : isInteractiveScene
+                          ? 'text-cyan-700 dark:text-cyan-300 bg-cyan-100/80 dark:bg-cyan-900/40 border border-cyan-500/70 dark:border-cyan-400/50 shadow-[0_0_10px_rgba(6,182,212,0.35)] dark:shadow-[0_0_10px_rgba(6,182,212,0.2)] cursor-pointer'
+                          : 'text-gray-600 dark:text-gray-300 bg-gray-100/80 dark:bg-gray-800/60 border border-gray-200/60 dark:border-white/10 hover:bg-gray-200/80 dark:hover:bg-gray-700/60 cursor-pointer',
+                    )}
+                    title={isInteractiveScene ? t('stage.interactiveMode') + ' (on)' : t('stage.interactiveMode')}
+                  >
+                    <Zap className={cn('h-3.5 w-3.5', isInteractiveScene && 'fill-cyan-500 dark:fill-cyan-400')} />
+                    <span>{t('stage.interactiveMode')}</span>
+                  </button>
+                  <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700 shrink-0" />
+                </>
+              )}
+            </div>
           )}
+
+          {/* ── Dropdown buttons — outside the scroll container so menus aren't clipped ── */}
 
           {/* Student Management — admin and instructor */}
           {canManageStudents && stageId && (
             <>
-              <div className="relative" ref={studentsRef}>
+              <div className="relative px-1" ref={studentsRef}>
                 <button
                   onClick={() => setStudentsOpen((v) => !v)}
                   className="h-9 w-9 rounded-full text-gray-400 dark:text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 hover:shadow-sm transition-all flex items-center justify-center"
@@ -204,7 +297,7 @@ export function Header({ currentSceneTitle }: HeaderProps) {
                   <Users className="h-4 w-4" />
                 </button>
                 {studentsOpen && (
-                  <div className="absolute top-full mt-2 right-0 z-50">
+                  <div className="absolute top-full mt-2 right-0 z-[70]">
                     <StudentManager stageId={stageId} open={studentsOpen} onOpenChange={setStudentsOpen} />
                   </div>
                 )}
@@ -214,13 +307,15 @@ export function Header({ currentSceneTitle }: HeaderProps) {
           )}
 
           {/* Language Selector */}
-          <LanguageSwitcher onOpen={() => setPrefOpen(false)} />
+          <div className="px-1">
+            <LanguageSwitcher onOpen={() => { setPrefOpen(false); setStudentsOpen(false); }} />
+          </div>
 
           <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700" />
 
-          {/* Preferences Button — admin and instructor */}
-          {(isAdmin || isInstructor) && (
-            <div className="relative" ref={prefRef}>
+          {/* Preferences Button — all authenticated users */}
+          {session?.user && (
+            <div className="relative px-1" ref={prefRef}>
               <button
                 onClick={() => setPrefOpen((v) => !v)}
                 className="h-9 w-9 rounded-full text-gray-400 dark:text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 hover:shadow-sm transition-all flex items-center justify-center"
@@ -230,7 +325,7 @@ export function Header({ currentSceneTitle }: HeaderProps) {
               </button>
 
               {prefOpen && (
-                <div className="absolute top-full mt-2 right-0 w-64 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-900/95 p-4 shadow-2xl backdrop-blur-md z-50">
+                <div className="absolute top-full mt-2 right-0 w-64 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-slate-900/95 p-4 shadow-2xl backdrop-blur-md z-[70]">
                   <p className="mb-3 text-sm font-semibold text-gray-800 dark:text-white">Preferences</p>
 
                   {/* Theme */}
@@ -304,7 +399,7 @@ export function Header({ currentSceneTitle }: HeaderProps) {
 
           {/* User Menu */}
           {session?.user && (
-            <div className="relative" ref={userMenuRef}>
+            <div className="relative pr-2" ref={userMenuRef}>
               <button
                 onClick={() => setUserMenuOpen((v) => !v)}
                 className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-purple-600 text-white text-xs font-semibold hover:ring-2 hover:ring-purple-400 transition-all"
@@ -318,7 +413,7 @@ export function Header({ currentSceneTitle }: HeaderProps) {
                 )}
               </button>
               {userMenuOpen && (
-                <div className="absolute top-full mt-2 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden z-50 min-w-[200px]">
+                <div className="absolute top-full mt-2 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden z-[70] min-w-[200px]">
                   <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
                     <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
                       {session.user.name ?? 'User'}
@@ -354,7 +449,7 @@ export function Header({ currentSceneTitle }: HeaderProps) {
               )}
             </div>
           )}
-        </div>
+        </div>{/* end pill */}
 
         {/* Export Dropdown */}
         <div className="relative" ref={exportRef}>
@@ -374,7 +469,7 @@ export function Header({ currentSceneTitle }: HeaderProps) {
               'shrink-0 p-2 rounded-full transition-all',
               canExport && !isExporting
                 ? 'text-gray-400 dark:text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 hover:shadow-sm'
-                : 'text-gray-300 dark:text-gray-600 cursor-not-allowed opacity-50',
+                : 'text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-40',
             )}
           >
             {isExporting ? (

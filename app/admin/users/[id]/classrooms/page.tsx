@@ -23,17 +23,17 @@ export default async function AdminUserClassroomsPage({ params }: { params: Prom
   );
 
   return (
-    <section className="rounded-xl border border-white/10 bg-white/5 p-5">
-      <h1 className="mb-4 text-xl font-semibold text-white">User Classrooms</h1>
+    <section className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-5">
+      <h1 className="mb-4 text-xl font-semibold text-slate-900 dark:text-white">User Classrooms</h1>
       {classrooms.length === 0 ? (
         <p className="text-sm text-slate-500">No classroom assignments found.</p>
       ) : (
         <ul className="space-y-2">
           {classrooms.map((item) => (
-            <li key={`${item.classroomId}-${item.assignedAt.toISOString()}`} className="rounded-lg border border-white/10 bg-black/20 px-3 py-2">
+            <li key={`${item.classroomId}-${item.assignedAt.toISOString()}`} className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-black/20 px-3 py-2">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm text-white">{item.title}</p>
+                  <p className="text-sm text-slate-900 dark:text-white">{item.title}</p>
                   <p className="font-mono text-xs text-slate-500">{item.classroomId}</p>
                 </div>
                 <Link href={`/admin/classrooms/${item.classroomId}`} className="text-sm text-primary hover:text-primary/80">Open</Link>

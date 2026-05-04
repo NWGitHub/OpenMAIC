@@ -127,10 +127,10 @@ export function PromptForm({ initialPrompt }: PromptFormProps) {
 
       {/* Identity section */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-white">Prompt Details</h3>
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Prompt Details</h3>
 
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1.5">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
             Key (unique identifier)
           </label>
           <input
@@ -138,30 +138,30 @@ export function PromptForm({ initialPrompt }: PromptFormProps) {
             value={form.key}
             onChange={(e) => setForm((f) => ({ ...f, key: e.target.value }))}
             disabled={!!initialPrompt}
-            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-3 py-2 rounded-lg bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
             placeholder="scene_outline_v1"
           />
-          {errors.key && <p className="text-red-400 text-xs mt-1">{errors.key}</p>}
+          {errors.key && <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.key}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1.5">Display name</label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Display name</label>
           <input
             type="text"
             value={form.displayName}
             onChange={(e) => setForm((f) => ({ ...f, displayName: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full px-3 py-2 rounded-lg bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
             placeholder="Scene Outline Generator"
           />
-          {errors.displayName && <p className="text-red-400 text-xs mt-1">{errors.displayName}</p>}
+          {errors.displayName && <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.displayName}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1.5">Category</label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Category</label>
           <select
             value={form.category}
             onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full px-3 py-2 rounded-lg bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
             {categories.map((cat) => (
               <option key={cat.value} value={cat.value}>
@@ -169,15 +169,15 @@ export function PromptForm({ initialPrompt }: PromptFormProps) {
               </option>
             ))}
           </select>
-          {errors.category && <p className="text-red-400 text-xs mt-1">{errors.category}</p>}
+          {errors.category && <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.category}</p>}
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1.5">Description</label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Description</label>
           <textarea
             value={form.description}
             onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+            className="w-full px-3 py-2 rounded-lg bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
             rows={2}
             placeholder="Optional description of this prompt template"
           />
@@ -186,15 +186,15 @@ export function PromptForm({ initialPrompt }: PromptFormProps) {
 
       {/* Content editor section */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-white">Prompt Content</h3>
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Prompt Content</h3>
 
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1.5">Prompt text</label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Prompt text</label>
           <textarea
             ref={contentRef}
             value={form.content}
             onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
-            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-y font-mono"
+            className="w-full px-3 py-2 rounded-lg bg-white dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-y font-mono"
             rows={10}
             placeholder="You are a helpful assistant. Context: {{context}}..."
           />
@@ -206,7 +206,7 @@ export function PromptForm({ initialPrompt }: PromptFormProps) {
 
       {/* Preview section */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-white">Preview</h3>
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Preview</h3>
         <PromptPreview
           displayName={form.displayName}
           original={form.content}
@@ -216,11 +216,11 @@ export function PromptForm({ initialPrompt }: PromptFormProps) {
 
       {/* Status section */}
       {initialPrompt && (
-        <div className="space-y-4 rounded-lg border border-white/10 bg-white/5 p-4">
+        <div className="space-y-4 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-white">Active (deployed)</p>
-              <p className="text-xs text-slate-400">This is the version currently in use</p>
+              <p className="text-sm font-medium text-slate-900 dark:text-white">Active (deployed)</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">This is the version currently in use</p>
             </div>
             <input
               type="checkbox"
@@ -229,7 +229,7 @@ export function PromptForm({ initialPrompt }: PromptFormProps) {
               className="w-4 h-4 accent-purple-500"
             />
           </div>
-          <p className="text-xs text-slate-500">Version {initialPrompt.version}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-500">Version {initialPrompt.version}</p>
         </div>
       )}
 
@@ -247,7 +247,7 @@ export function PromptForm({ initialPrompt }: PromptFormProps) {
           type="button"
           variant="outline"
           onClick={() => router.push('/admin/system-config/prompts')}
-          className="border-white/10 text-slate-300"
+          className="border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300"
         >
           Cancel
         </Button>

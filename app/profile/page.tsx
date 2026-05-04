@@ -12,10 +12,21 @@ import {
   Loader2,
   CheckCircle2,
   AlertTriangle,
+  BookOpen,
+  BarChart3,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useI18n } from '@/lib/hooks/use-i18n';
+import { MuBrandingHeader } from '@/components/mu-branding-header';
+
+interface EnrolledClassroom {
+  id: string;
+  name: string;
+  completedScenes: number;
+  sceneCount: number;
+  instructorName: string | null;
+}
 
 interface UserProfile {
   id: string;
@@ -45,6 +56,7 @@ export default function ProfilePage() {
   const [pwSuccess, setPwSuccess] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [classrooms, setClassrooms] = useState<EnrolledClassroom[]>([]);
 
   useEffect(() => {
     fetch('/api/user/profile')
@@ -52,6 +64,12 @@ export default function ProfilePage() {
       .then((d) => {
         setProfile(d.user);
         setForm({ bio: d.user?.bio ?? '' });
+        if (d.user?.role === 'STUDENT') {
+          fetch('/api/user/classrooms')
+            .then((r) => r.json())
+            .then((cl) => setClassrooms(cl.classrooms ?? []))
+            .catch(() => {});
+        }
       })
       .finally(() => setLoading(false));
   }, []);
@@ -119,6 +137,11 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-8 px-4">
       <div className="max-w-2xl mx-auto space-y-6">
+        {/* MU-OpenMAIC branding — top centre */}
+        <div className="flex justify-center pt-2 pb-2">
+          <MuBrandingHeader large />
+        </div>
+
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{t('profilePage.title')}</h1>
           <Link href="/" className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-sm">{t('profilePage.back')}</Link>
@@ -151,14 +174,77 @@ export default function ProfilePage() {
             </div>
           </form>
 
-          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-white/5 text-xs text-slate-500 dark:text-slate-500 space-y-1">
-            <p>{t('profilePage.email')}: <span className="text-slate-700 dark:text-slate-300">{profile?.email}</span></p>
-            <p>{t('profilePage.studentId')}: <span className="text-slate-700 dark:text-slate-300">{profile?.studentId ?? '—'}</span></p>
-            <p>{t('profilePage.role')}: <span className="text-slate-700 dark:text-slate-300">{profile?.role}</span></p>
-            <p>{t('profilePage.memberSince')}: <span className="text-slate-700 dark:text-slate-300">{profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString() : '—'}</span></p>
-            <p>{t('profilePage.lastLogin')}: <span className="text-slate-700 dark:text-slate-300">{profile?.lastLoginAt ? new Date(profile.lastLoginAt).toLocaleString() : '—'}</span></p>
+          <div className="mt-4 pt-4 border-t border-slate-100 dark:border-white/5 space-y-1">
+            {profile?.role === 'STUDENT' && profile.studentId && (
+              <div className="mb-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
+                <span className="text-xs font-medium text-purple-700 dark:text-purple-300">{t('profilePage.studentId')}:</span>
+                <span className="font-mono text-sm font-bold text-purple-800 dark:text-purple-200">{profile.studentId}</span>
+              </div>
+            )}
+            <div className="text-xs text-slate-500 dark:text-slate-500 space-y-1">
+              <p>{t('profilePage.email')}: <span className="text-slate-700 dark:text-slate-300">{profile?.email}</span></p>
+              {(profile?.role !== 'STUDENT' || !profile.studentId) && (
+                <p>{t('profilePage.studentId')}: <span className="text-slate-700 dark:text-slate-300">{profile?.studentId ?? '—'}</span></p>
+              )}
+              <p>{t('profilePage.role')}: <span className="text-slate-700 dark:text-slate-300">{profile?.role}</span></p>
+              <p>{t('profilePage.memberSince')}: <span className="text-slate-700 dark:text-slate-300">{profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString() : '—'}</span></p>
+              <p>{t('profilePage.lastLogin')}: <span className="text-slate-700 dark:text-slate-300">{profile?.lastLoginAt ? new Date(profile.lastLoginAt).toLocaleString() : '—'}</span></p>
+            </div>
           </div>
         </section>
+
+        {/* Student learning stats */}
+        {profile?.role === 'STUDENT' && (
+          <section className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl p-6">
+            <h2 className="text-slate-900 dark:text-white font-semibold mb-4 flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-purple-400" /> {t('classroom.enrolledClassrooms')}
+            </h2>
+            {classrooms.length === 0 ? (
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('classroom.noInvitedClassrooms')}</p>
+            ) : (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 px-4 py-3">
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white">{classrooms.length}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{t('classroom.enrolledClassrooms')}</p>
+                  </div>
+                  <div className="rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 px-4 py-3">
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                      {classrooms.reduce((s, c) => s + c.completedScenes, 0)}
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{t('classroom.scenesCompleted')}</p>
+                  </div>
+                </div>
+                {classrooms.map((c) => (
+                  <Link
+                    key={c.id}
+                    href={`/classroom/${c.id}`}
+                    className="flex items-center gap-3 p-3 rounded-lg border border-slate-100 dark:border-white/10 hover:border-purple-300 dark:hover:border-purple-700 hover:bg-purple-50/50 dark:hover:bg-purple-900/20 transition-colors group"
+                  >
+                    <BookOpen className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-800 dark:text-white truncate group-hover:text-purple-700 dark:group-hover:text-purple-300">{c.name}</p>
+                      {c.instructorName && (
+                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{c.instructorName}</p>
+                      )}
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-medium text-slate-600 dark:text-slate-300">{c.completedScenes}/{c.sceneCount}</p>
+                      {c.sceneCount > 0 && (
+                        <div className="w-16 h-1 mt-1 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-purple-500"
+                            style={{ width: `${Math.round((c.completedScenes / c.sceneCount) * 100)}%` }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         {session?.user && (
           <section className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl p-6">

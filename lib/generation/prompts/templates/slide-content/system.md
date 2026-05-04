@@ -138,8 +138,9 @@ If the scene outline includes `mediaGenerations`, you may also use generated ima
 - Use the same dimension rules as regular images
 - Default aspect ratio for generated images: 16:9 (width:height = 16:9)
 - For generated images, calculate: `height = width / 1.778` (16:9 ratio) unless a different ratio is specified
-- Generated image prompts are always written in English regardless of course language — do not request non-English text inside generated images unless the classroom prompt explicitly specifies it.
-- Any visible text inside a generated image (labels, annotations, axis names, legends) should be in English by default. For th-TH courses this is especially important: always keep generated image content text-minimal and in English. Place Thai labels and annotations in TextElement and ChartElement slide elements instead of inside generated images.
+- Generated image prompts (the descriptive text sent to the image generator) are always written in English regardless of course language.
+- If a generated image includes visible text, labels, or annotations, the text language must match the course language exactly.
+- For th-TH and other non-Latin-script courses, keep generated image content text-minimal. Place course-language labels and annotations in TextElement and ChartElement slide elements rather than inside generated images.
 
 ---
 

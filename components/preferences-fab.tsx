@@ -8,9 +8,9 @@ import { useTheme } from '@/lib/hooks/use-theme';
 import { cn } from '@/lib/utils';
 
 const FONT_SIZES = [
-  { label: 'Small', value: 14 },
-  { label: 'Default', value: 16 },
-  { label: 'Large', value: 18 },
+  { label: 'Small', value: 16 },
+  { label: 'Default', value: 18 },
+  { label: 'Large', value: 20 },
 ] as const;
 
 const FONT_SIZE_KEY = 'openmaic-ui-font-size';
@@ -27,7 +27,7 @@ export function PreferencesFab() {
   const { theme, setTheme } = useTheme();
 
   const [open, setOpen] = useState(false);
-  const [fontSize, setFontSize] = useState<number>(16);
+  const [fontSize, setFontSize] = useState<number>(18);
 
   const ref = useRef<HTMLDivElement>(null);
 
@@ -38,8 +38,8 @@ export function PreferencesFab() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const saved = window.localStorage.getItem(FONT_SIZE_KEY);
-    const parsed = saved ? Number(saved) : 16;
-    const next = Number.isFinite(parsed) && [14, 16, 18].includes(parsed) ? parsed : 16;
+    const parsed = saved ? Number(saved) : 18;
+    const next = Number.isFinite(parsed) && [16, 18, 20].includes(parsed) ? parsed : 18;
     setFontSize(next);
     applyRootFontSize(next);
   }, []);
@@ -81,11 +81,11 @@ export function PreferencesFab() {
         </button>
 
         {open && (
-          <div className="absolute top-14 right-0 w-72 rounded-2xl border border-white/10 bg-slate-900/95 p-4 text-white shadow-2xl backdrop-blur-md">
+          <div className="absolute top-14 right-0 w-72 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/95 p-4 text-slate-900 dark:text-white shadow-2xl backdrop-blur-md">
             <p className="mb-3 text-sm font-semibold">Preferences</p>
 
             <div className="space-y-2">
-              <p className="text-xs uppercase tracking-wide text-slate-400">Theme</p>
+              <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Theme</p>
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
@@ -93,8 +93,8 @@ export function PreferencesFab() {
                   className={cn(
                     'inline-flex items-center justify-center gap-1 rounded-lg border px-2 py-2 text-xs transition-colors',
                     theme === 'light'
-                      ? 'border-sky-400 bg-sky-500/20 text-sky-200'
-                      : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10',
+                      ? 'border-sky-500 bg-sky-100 dark:bg-sky-500/20 text-sky-700 dark:text-sky-200'
+                      : 'border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10',
                   )}
                 >
                   <Sun className="h-3.5 w-3.5" /> Light
@@ -105,8 +105,8 @@ export function PreferencesFab() {
                   className={cn(
                     'inline-flex items-center justify-center gap-1 rounded-lg border px-2 py-2 text-xs transition-colors',
                     theme === 'dark'
-                      ? 'border-sky-400 bg-sky-500/20 text-sky-200'
-                      : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10',
+                      ? 'border-sky-500 bg-sky-100 dark:bg-sky-500/20 text-sky-700 dark:text-sky-200'
+                      : 'border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10',
                   )}
                 >
                   <Moon className="h-3.5 w-3.5" /> Dark
@@ -117,8 +117,8 @@ export function PreferencesFab() {
                   className={cn(
                     'inline-flex items-center justify-center gap-1 rounded-lg border px-2 py-2 text-xs transition-colors',
                     theme === 'system'
-                      ? 'border-sky-400 bg-sky-500/20 text-sky-200'
-                      : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10',
+                      ? 'border-sky-500 bg-sky-100 dark:bg-sky-500/20 text-sky-700 dark:text-sky-200'
+                      : 'border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10',
                   )}
                 >
                   <Monitor className="h-3.5 w-3.5" /> System
@@ -127,7 +127,7 @@ export function PreferencesFab() {
             </div>
 
             <div className="mt-4 space-y-2">
-              <p className="text-xs uppercase tracking-wide text-slate-400">Size</p>
+              <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Size</p>
               <div className="grid grid-cols-3 gap-2">
                 {FONT_SIZES.map((size) => (
                   <button
@@ -137,8 +137,8 @@ export function PreferencesFab() {
                     className={cn(
                       'inline-flex items-center justify-center gap-1 rounded-lg border px-2 py-2 text-xs transition-colors',
                       fontSize === size.value
-                        ? 'border-sky-400 bg-sky-500/20 text-sky-200'
-                        : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10',
+                        ? 'border-sky-500 bg-sky-100 dark:bg-sky-500/20 text-sky-700 dark:text-sky-200'
+                        : 'border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10',
                     )}
                   >
                     <Type className="h-3.5 w-3.5" /> {size.label}
@@ -148,7 +148,7 @@ export function PreferencesFab() {
             </div>
 
             {isAdmin && (
-              <div className="mt-4 border-t border-white/10 pt-3">
+              <div className="mt-4 border-t border-slate-200 dark:border-white/10 pt-3">
                 <button
                   type="button"
                   onClick={() => {

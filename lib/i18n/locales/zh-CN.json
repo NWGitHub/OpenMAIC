@@ -3,7 +3,11 @@
     "you": "你",
     "confirm": "确定",
     "cancel": "取消",
-    "loading": "加载中..."
+    "loading": "加载中...",
+    "pagination": {
+      "previous": "上一页",
+      "next": "下一页"
+    }
   },
   "home": {
     "slogan": "Generative Learning in Multi-Agent Interactive Classroom",
@@ -117,7 +121,8 @@
     "confirmSwitchMessage": "当前话题正在进行中，切换页面将结束当前话题。确定要切换吗？",
     "generatingNextPage": "场景正在生成，请稍候...",
     "fullscreen": "全屏",
-    "exitFullscreen": "退出全屏"
+    "exitFullscreen": "退出全屏",
+    "interactiveMode": "互动模式"
   },
   "whiteboard": {
     "title": "互动白板",
@@ -270,7 +275,18 @@
     "delete": "删除",
     "rename": "重命名",
     "renamePlaceholder": "输入课堂名称",
-    "renameFailed": "重命名失败"
+    "renameFailed": "重命名失败",
+    "enrolledClassrooms": "已加入课堂",
+    "scenesCompleted": "已完成场景",
+    "newAssignments": "新作业",
+    "newAssignmentBanner": "新作业",
+    "noInvitedClassrooms": "暂无分配课堂，请联系你的教师获取邀请。",
+    "progress": "进度",
+    "grades": "成绩",
+    "continue": "继续",
+    "start": "开始",
+    "open": "打开",
+    "scenes": "场景"
   },
   "upload": {
     "pdfSizeLimit": "支持最大50MB的PDF文件",
@@ -1007,97 +1023,6 @@
     "cancel": "取消",
     "confirmAnonymize": "是，进行匿名化"
   },
-  "adminClassrooms": {
-    "title": "课堂管理",
-    "newClassroom": "新建课堂",
-    "newClassroomDisabled": "新建课堂（向导已禁用）",
-    "noClassrooms": "暂无课堂",
-    "noClassroomsDesc": "通过引导流程创建课堂。",
-    "manage": "管理",
-    "recover": "恢复",
-    "missing": "缺失",
-    "recoverSuccess": "课堂恢复成功",
-    "recoverFailed": "课堂恢复失败",
-    "columns": {
-      "classroom": "课堂",
-      "title": "标题",
-      "owner": "所有者",
-      "students": "学生数",
-      "updated": "更新时间"
-    }
-  },
-  "adminRoles": {
-    "title": "角色管理",
-    "subtitle": "管理内置和自定义角色及权限",
-    "newRole": "新建角色",
-    "noRoles": "暂无角色",
-    "noRolesDesc": "创建自定义角色以开始。",
-    "accessDeniedTitle": "访问被拒绝",
-    "accessDenied": "您没有查看角色的权限。",
-    "loadFailed": "加载角色失败。",
-    "deleteConfirm": "删除此自定义角色？此操作无法撤销。",
-    "builtIn": "内置",
-    "custom": "自定义",
-    "permissions": "个权限",
-    "manageRole": "管理角色",
-    "deleteRole": "删除角色",
-    "columns": {
-      "name": "名称",
-      "displayName": "显示名称",
-      "type": "类型",
-      "permissions": "权限"
-    }
-  },
-  "adminSettings": {
-    "title": "通用设置",
-    "subtitle": "配置系统全局默认值和行为",
-    "changesNotice": "项设置已更改，点击保存以应用。",
-    "save": "保存更改",
-    "saving": "保存中...",
-    "savedSuccess": "设置保存成功",
-    "saveFailed": "保存设置失败",
-    "loadFailed": "加载设置失败",
-    "noChanges": "无更改可保存",
-    "allSaved": "所有更改已保存",
-    "providerManagerTitle": "提供商和模型管理器",
-    "providerManagerDesc": "管理 LLM 提供商、API 密钥、基础 URL 和模型列表。",
-    "openProviderManager": "打开提供商管理器"
-  },
-  "profilePage": {
-    "title": "我的资料",
-    "back": "← 返回",
-    "profileInfo": "个人信息",
-    "fullName": "姓名",
-    "bio": "简介",
-    "saveChanges": "保存更改",
-    "saveSuccess": "资料已更新。",
-    "saveFailed": "保存失败。",
-    "email": "邮箱",
-    "studentId": "学号",
-    "role": "角色",
-    "memberSince": "注册时间",
-    "lastLogin": "最后登录",
-    "changePassword": "修改密码",
-    "currentPassword": "当前密码",
-    "newPassword": "新密码（至少10位）",
-    "confirmPassword": "确认新密码",
-    "pwMismatch": "两次密码不一致。",
-    "pwTooShort": "新密码至少需要10位字符。",
-    "pwChangeFailed": "失败。",
-    "pwChangeSuccess": "密码修改成功。",
-    "updatePassword": "更新密码",
-    "privacyTitle": "隐私与数据（PDPA）",
-    "consentGiven": "已同意",
-    "consentYes": "是",
-    "consentNo": "否",
-    "exportData": "导出我的数据（JSON）",
-    "deleteAccount": "删除我的账户",
-    "pdpaNotice": "根据泰国个人数据保护法，您有权访问、更正和删除个人数据。您的个人信息将被永久匿名化。注意：必要的学术记录（成绩、成绩单、入学历史）将为合规目的保留，无法删除。",
-    "anonymizeTitle": "匿名化账户？",
-    "anonymizeDesc": "您的账户和个人信息（姓名、邮箱、头像、简介）将被永久匿名化，您将被登出。学术记录将被安全保留以满足合规要求。此操作不可撤销。",
-    "cancel": "取消",
-    "confirmAnonymize": "是，进行匿名化"
-  },
   "quickPreferences": {
     "theme": "主题",
     "light": "浅色",
@@ -1169,6 +1094,46 @@
     "students": "学生",
     "created": "创建于",
     "manage": "管理"
+  },
+  "studentDashboard": {
+    "title": "学生主页",
+    "welcomeBack": "欢迎回来，",
+    "taskMenu": "快速入口",
+    "taskMenuDescription": "跳转到您的主要学习活动。",
+    "taskDashboard": "我的主页",
+    "taskDashboardSub": "已加入的课堂",
+    "taskMyClassrooms": "我的课堂",
+    "taskMyClassroomsSubNew": "{{count}} 个新作业",
+    "taskMyClassroomsSubNewPlural": "{{count}} 个新作业",
+    "taskMyClassroomsSubNone": "全部已读",
+    "taskMyProgress": "我的进度",
+    "taskMyProgressSub": "共 {{total}} 个场景",
+    "taskSettings": "我的个人资料",
+    "taskSettingsSub": "查看和编辑您的个人资料",
+    "backToDashboard": "返回仪表板",
+    "classroomsViewTitle": "我的课堂",
+    "createClassroomTitle": "创建新课堂",
+    "createClassroomDesc": "描述您的学习主题，让 AI 为您生成课堂内容",
+    "invitedSectionTitle": "已加入的课堂",
+    "ownedSectionTitle": "我创建的课堂",
+    "noOwnedClassrooms": "您还没有创建任何课堂。",
+    "pageOf": "第 {{page}} 页，共 {{total}} 页",
+    "progressViewTitle": "我的进度",
+    "overallSummary": "总体概况",
+    "overallScore": "综合评分",
+    "sceneProgressLabel": "场景进度",
+    "quizPerformanceLabel": "测验成绩",
+    "noQuizResults": "暂无测验成绩",
+    "loadingGrades": "正在加载成绩...",
+    "quizResultCount": "{{count}} 条结果",
+    "quizResultCountPlural": "{{count}} 条结果",
+    "profileViewTitle": "我的个人资料",
+    "displayPreferences": "显示偏好",
+    "aiNickname": "AI 昵称",
+    "aiNicknameDesc": "在 AI 生成的课堂中显示的名称",
+    "avatarSelect": "选择您的头像",
+    "savePreferences": "保存偏好",
+    "preferencesSaved": "偏好已保存。"
   },
   "instructorClassrooms": {
     "title": "课堂",
@@ -1488,7 +1453,8 @@
       "enrollFailed": "课堂已创建，但关联学生注册失败",
       "manualEnrollFailed": "课堂已创建，但 {{count}} 名手动添加的学生账号需在「学生」标签页中后续处理",
       "created": "课堂已创建！",
-      "unexpectedError": "发生了意外错误"
+      "unexpectedError": "发生了意外错误",
+      "backToClassroom": "返回课堂"
     },
     "schedule": {
       "stepLabel": "第 4 步，共 5 步",
@@ -1501,6 +1467,50 @@
       "scheduled": "按计划学习",
       "startDateLabel": "开始日期（可选）",
       "endDateLabel": "结束日期（可选）"
+    }
+  },
+  "generateScenes": {
+    "title": "生成课程场景",
+    "subtitle": "为「{{name}}」创建 AI 学习场景",
+    "forClassroom": "所属课堂",
+    "promptLabel": "这个课堂应该教授什么？",
+    "promptHint": "描述主题、学习目标，或粘贴课程大纲。",
+    "promptPlaceholder": "例如：面向高中生的牛顿运动定律入门…",
+    "generating": "生成中…",
+    "generateBtn": "生成场景",
+    "setupModel": "配置模型",
+    "tip": "提示：按 ⌘ + Enter 开始生成"
+  },
+  "canvas": {
+    "contextMenu": {
+      "cut": "剪切",
+      "copy": "复制",
+      "paste": "粘贴",
+      "selectAll": "全选",
+      "delete": "删除",
+      "lock": "锁定",
+      "unlock": "解锁",
+      "setLink": "设置链接",
+      "group": "组合",
+      "ungroup": "取消组合",
+      "ruler": "标尺",
+      "gridLines": "网格线",
+      "gridNone": "无",
+      "gridSmall": "小",
+      "gridMedium": "中",
+      "gridLarge": "大",
+      "resetPage": "重置当前页",
+      "alignHorizontal": "水平居中",
+      "alignVertical": "垂直居中",
+      "alignCenter": "水平垂直居中",
+      "alignLeft": "左对齐",
+      "alignRight": "右对齐",
+      "alignTop": "顶部对齐",
+      "alignBottom": "底部对齐",
+      "bringToFront": "置于顶层",
+      "bringForward": "上移一层",
+      "sendToBack": "置于底层",
+      "sendBackward": "下移一层"
     }
   },
   "media": {
@@ -1517,5 +1527,21 @@
     "voice": "音色",
     "speed": "语速",
     "language": "语言"
+  },
+  "signIn": {
+    "title": "登录您的账户",
+    "emailLabel": "电子邮箱",
+    "passwordLabel": "密码",
+    "showPassword": "显示密码",
+    "hidePassword": "隐藏密码",
+    "signingIn": "登录中…",
+    "submit": "登录",
+    "orContinueWith": "或通过以下方式继续",
+    "pdpaNotice": "受泰国 PDPA 保护。登录即表示您同意我们的数据处理规范。",
+    "errors": {
+      "CredentialsSignin": "邮箱或密码无效",
+      "AccountDisabled": "您的账户已被禁用，请联系管理员",
+      "Default": "登录失败，请重试"
+    }
   }
 }

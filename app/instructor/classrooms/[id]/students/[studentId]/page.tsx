@@ -48,15 +48,15 @@ export default async function InstructorStudentDetailPage({
       <div className="flex items-center gap-3">
         <Link
           href={`/instructor/classrooms/${classroomId}/students`}
-          className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition-colors"
+          className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> Back to roster
         </Link>
       </div>
 
       {/* Student detail card */}
-      <section className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-4">
-        <h1 className="text-xl font-semibold text-white flex items-center gap-2">
+      <section className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-6 space-y-4">
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-white flex items-center gap-2">
           <User className="w-5 h-5 text-indigo-400" />
           {user.name ?? '(no name)'}
         </h1>
@@ -77,9 +77,9 @@ export default async function InstructorStudentDetailPage({
       </section>
 
       {/* Quiz results */}
-      <section className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-4">
+      <section className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-white flex items-center gap-2">
+          <h2 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-emerald-400" />
             Quiz Results
           </h2>
@@ -99,21 +99,21 @@ export default async function InstructorStudentDetailPage({
             description="Quiz results will appear here once the student completes quizzes."
           />
         ) : (
-          <div className="overflow-hidden rounded-lg border border-white/10">
+          <div className="overflow-hidden rounded-lg border border-slate-200 dark:border-white/10">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-left text-xs uppercase tracking-wider text-slate-500">
+                <tr className="border-b border-slate-200 dark:border-white/10 text-left text-xs uppercase tracking-wider text-slate-500">
                   <th className="px-3 py-2">Scene / Quiz</th>
                   <th className="px-3 py-2">Score</th>
                   <th className="px-3 py-2">Graded by</th>
                   <th className="px-3 py-2">Date</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                 {quizResults.map((r) => (
-                  <tr key={r.id} className="hover:bg-white/4">
-                    <td className="px-3 py-2 text-white">{r.sceneTitle}</td>
-                    <td className="px-3 py-2 text-slate-200">
+                  <tr key={r.id} className="hover:bg-slate-50 dark:hover:bg-white/4">
+                    <td className="px-3 py-2 text-slate-900 dark:text-white">{r.sceneTitle}</td>
+                    <td className="px-3 py-2 text-slate-700 dark:text-slate-200">
                       {r.score}/{r.maxScore}
                     </td>
                     <td className="px-3 py-2 text-slate-400 text-xs">

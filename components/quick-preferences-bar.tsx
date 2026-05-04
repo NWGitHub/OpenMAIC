@@ -13,14 +13,16 @@ import { cn } from '@/lib/utils';
 const FONT_SIZE_KEY = 'openmaic-ui-font-size';
 
 const FONT_SIZES = [
-  { key: 'quickPreferences.small', value: 14 },
-  { key: 'quickPreferences.default', value: 16 },
-  { key: 'quickPreferences.large', value: 18 },
+  { key: 'quickPreferences.small', value: 16 },
+  { key: 'quickPreferences.default', value: 18 },
+  { key: 'quickPreferences.large', value: 20 },
 ] as const;
 
 function applyRootFontSize(size: number) {
   if (typeof document === 'undefined') return;
   document.documentElement.style.fontSize = `${size}px`;
+  const level = size <= 16 ? 'small' : size >= 20 ? 'large' : 'default';
+  document.documentElement.setAttribute('data-font-size', level);
 }
 
 export function QuickPreferencesBar() {
@@ -32,7 +34,7 @@ export function QuickPreferencesBar() {
 
   const [themeOpen, setThemeOpen] = useState(false);
   const [fontSizeOpen, setFontSizeOpen] = useState(false);
-  const [fontSize, setFontSize] = useState<number>(16);
+  const [fontSize, setFontSize] = useState<number>(18);
   const [isOptedOut, setIsOptedOut] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -54,8 +56,8 @@ export function QuickPreferencesBar() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem(FONT_SIZE_KEY);
-      const parsed = saved ? Number(saved) : 16;
-      const next = Number.isFinite(parsed) && [14, 16, 18].includes(parsed) ? parsed : 16;
+      const parsed = saved ? Number(saved) : 18;
+      const next = Number.isFinite(parsed) && [16, 18, 20].includes(parsed) ? parsed : 18;
       setFontSize(next);
       applyRootFontSize(next);
     } catch {
@@ -95,7 +97,7 @@ export function QuickPreferencesBar() {
   return (
     <div
       ref={rootRef}
-      className="w-full flex items-center justify-end gap-1 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-4 py-1.5 border-b border-gray-100 dark:border-gray-800"
+      className="relative z-[100] w-full flex items-center justify-end gap-1 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md px-4 py-1.5 border-b border-gray-100 dark:border-gray-800"
     >
       <LanguageSwitcher
         onOpen={() => {
@@ -124,7 +126,7 @@ export function QuickPreferencesBar() {
             {theme === 'system' && <Monitor className="w-4 h-4" />}
           </button>
           {themeOpen && (
-            <div className="absolute top-full mt-2 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden z-[66] min-w-[140px]">
+            <div className="absolute top-full mt-2 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden z-[9999] min-w-[140px]">
               <button
                 onClick={() => {
                   setTheme('light');
@@ -186,7 +188,7 @@ export function QuickPreferencesBar() {
             <Type className="w-4 h-4" />
           </button>
           {fontSizeOpen && (
-            <div className="absolute top-full mt-2 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden z-[66] min-w-[140px]">
+            <div className="absolute top-full mt-2 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden z-[9999] min-w-[140px]">
               {FONT_SIZES.map((size) => (
                 <button
                   key={size.value}

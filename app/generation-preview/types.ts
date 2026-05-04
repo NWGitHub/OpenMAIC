@@ -27,6 +27,8 @@ export interface GenerationSessionState {
   // Web search context
   researchContext?: string;
   researchSources?: Array<{ title: string; url: string }>;
+  // Interactive mode: force all generated scenes to use the 'interactive' type
+  interactiveMode?: boolean;
 }
 
 export type GenerationStep = {

@@ -6,7 +6,7 @@ export default async function AdminClassroomStudentsPage({ params }: { params: P
 
   return (
     <section className="rounded-xl border border-white/10 bg-white/5 p-5">
-      <h1 className="mb-4 text-xl font-semibold text-white"><I18nText k="adminClassroomStudents.title" fallback="Students" /></h1>
+      <h1 className="mb-4 text-xl font-semibold text-slate-900 dark:text-white"><I18nText k="adminClassroomStudents.title" fallback="Students" /></h1>
       <ClassroomAssignPanel classroomId={id} />
     </section>
   );

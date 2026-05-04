@@ -3,7 +3,11 @@
     "you": "あなた",
     "confirm": "確認",
     "cancel": "キャンセル",
-    "loading": "読み込み中..."
+    "loading": "読み込み中...",
+    "pagination": {
+      "previous": "前へ",
+      "next": "次へ"
+    }
   },
   "home": {
     "slogan": "マルチエージェント対話型教室で生成的に学ぶ",
@@ -117,7 +121,8 @@
     "confirmSwitchMessage": "現在トピックが進行中です。シーンを切り替えると、現在のトピックが終了します。よろしいですか？",
     "generatingNextPage": "シーンを生成中です。お待ちください...",
     "fullscreen": "全画面表示",
-    "exitFullscreen": "全画面表示を終了"
+    "exitFullscreen": "全画面表示を終了",
+    "interactiveMode": "インタラクティブ"
   },
   "whiteboard": {
     "title": "インタラクティブホワイトボード",
@@ -269,7 +274,18 @@
     "delete": "削除",
     "rename": "名前を変更",
     "renamePlaceholder": "教室名を入力",
-    "renameFailed": "教室名の変更に失敗しました"
+    "renameFailed": "教室名の変更に失敗しました",
+    "enrolledClassrooms": "登録済みクラスルーム",
+    "scenesCompleted": "完了シーン",
+    "newAssignments": "新しい課題",
+    "newAssignmentBanner": "新しい課題",
+    "noInvitedClassrooms": "まだクラスルームが割り当てられていません。インストラクターに招待を依頼してください。",
+    "progress": "進捗",
+    "grades": "成績",
+    "continue": "続ける",
+    "start": "開始",
+    "open": "開く",
+    "scenes": "シーン"
   },
   "upload": {
     "pdfSizeLimit": "50MBまでのPDFファイルに対応しています",
@@ -1038,7 +1054,8 @@
       "enrollFailed": "クラスルームは作成されましたが、リンクされた受講者の登録に失敗しました",
       "manualEnrollFailed": "クラスルームは作成されましたが、{{count}} 名の手動追加受講者は「受講者」タブでのフォローアップが必要です",
       "created": "クラスルームを作成しました！",
-      "unexpectedError": "予期しないエラーが発生しました"
+      "unexpectedError": "予期しないエラーが発生しました",
+      "backToClassroom": "クラスルームに戻る"
     },
     "schedule": {
       "stepLabel": "ステップ 4 / 5",
@@ -1051,6 +1068,50 @@
       "scheduled": "スケジュール型",
       "startDateLabel": "開始日時（任意）",
       "endDateLabel": "終了日時（任意）"
+    }
+  },
+  "generateScenes": {
+    "title": "シーンを生成",
+    "subtitle": "「{{name}}」のAI学習シーンを作成",
+    "forClassroom": "対象クラスルーム",
+    "promptLabel": "このクラスルームで何を教えますか？",
+    "promptHint": "トピック、学習目標を説明するか、カリキュラムの概要を貼り付けてください。",
+    "promptPlaceholder": "例：高校生向けニュートンの運動法則の入門…",
+    "generating": "生成中…",
+    "generateBtn": "シーンを生成",
+    "setupModel": "モデルを設定",
+    "tip": "ヒント：⌘ + Enter で生成を開始"
+  },
+  "canvas": {
+    "contextMenu": {
+      "cut": "切り取り",
+      "copy": "コピー",
+      "paste": "貼り付け",
+      "selectAll": "すべて選択",
+      "delete": "削除",
+      "lock": "ロック",
+      "unlock": "ロック解除",
+      "setLink": "リンクを設定",
+      "group": "グループ化",
+      "ungroup": "グループ解除",
+      "ruler": "ルーラー",
+      "gridLines": "グリッド線",
+      "gridNone": "なし",
+      "gridSmall": "小",
+      "gridMedium": "中",
+      "gridLarge": "大",
+      "resetPage": "ページをリセット",
+      "alignHorizontal": "水平方向に整列",
+      "alignVertical": "垂直方向に整列",
+      "alignCenter": "中央に整列",
+      "alignLeft": "左揃え",
+      "alignRight": "右揃え",
+      "alignTop": "上揃え",
+      "alignBottom": "下揃え",
+      "bringToFront": "最前面へ",
+      "bringForward": "前面へ",
+      "sendToBack": "最背面へ",
+      "sendBackward": "背面へ"
     }
   },
   "media": {
@@ -1282,6 +1343,46 @@
     "created": "作成日",
     "manage": "管理"
   },
+  "studentDashboard": {
+    "title": "学生ダッシュボード",
+    "welcomeBack": "おかえりなさい、",
+    "taskMenu": "クイックアクション",
+    "taskMenuDescription": "主な学習活動にジャンプします。",
+    "taskDashboard": "マイダッシュボード",
+    "taskDashboardSub": "登録クラスルーム",
+    "taskMyClassrooms": "マイクラスルーム",
+    "taskMyClassroomsSubNew": "{{count}}件の新しい課題",
+    "taskMyClassroomsSubNewPlural": "{{count}}件の新しい課題",
+    "taskMyClassroomsSubNone": "すべて確認済み",
+    "taskMyProgress": "マイ進捗",
+    "taskMyProgressSub": "全{{total}}シーン中",
+    "taskSettings": "マイプロフィール",
+    "taskSettingsSub": "プロフィールの表示・編集",
+    "backToDashboard": "ダッシュボードに戻る",
+    "classroomsViewTitle": "マイクラスルーム",
+    "createClassroomTitle": "新しいクラスルームを作成",
+    "createClassroomDesc": "学習トピックを説明して、AIがクラスルームを生成します",
+    "invitedSectionTitle": "登録済みのクラスルーム",
+    "ownedSectionTitle": "作成したクラスルーム",
+    "noOwnedClassrooms": "まだクラスルームを作成していません。",
+    "pageOf": "{{total}}ページ中{{page}}ページ",
+    "progressViewTitle": "マイ進捗",
+    "overallSummary": "全体サマリー",
+    "overallScore": "総合スコア",
+    "sceneProgressLabel": "シーン進捗",
+    "quizPerformanceLabel": "クイズ成績",
+    "noQuizResults": "まだクイズ結果がありません",
+    "loadingGrades": "成績を読み込み中...",
+    "quizResultCount": "{{count}}件",
+    "quizResultCountPlural": "{{count}}件",
+    "profileViewTitle": "マイプロフィール",
+    "displayPreferences": "表示設定",
+    "aiNickname": "AIニックネーム",
+    "aiNicknameDesc": "AIクラスルームセッションで表示される名前",
+    "avatarSelect": "アバターを選択",
+    "savePreferences": "設定を保存",
+    "preferencesSaved": "設定を保存しました。"
+  },
   "instructorClassrooms": {
     "title": "クラスルーム",
     "newClassroom": "新しいクラスルーム",
@@ -1425,5 +1526,21 @@
     "total": "合計",
     "noQuizResults": "クイズ結果がありません",
     "noQuizResultsDesc": "このクラスで学生がクイズを完了すると、ここに結果が表示されます。"
+  },
+  "signIn": {
+    "title": "アカウントにサインイン",
+    "emailLabel": "メールアドレス",
+    "passwordLabel": "パスワード",
+    "showPassword": "パスワードを表示",
+    "hidePassword": "パスワードを非表示",
+    "signingIn": "サインイン中…",
+    "submit": "サインイン",
+    "orContinueWith": "または以下で続行",
+    "pdpaNotice": "タイ PDPA により保護されています。サインインすることで、データ取り扱い方針に同意したものとみなされます。",
+    "errors": {
+      "CredentialsSignin": "メールアドレスまたはパスワードが無効です",
+      "AccountDisabled": "アカウントが無効化されています。管理者にお問い合わせください。",
+      "Default": "サインインに失敗しました。もう一度お試しください。"
+    }
   }
 }

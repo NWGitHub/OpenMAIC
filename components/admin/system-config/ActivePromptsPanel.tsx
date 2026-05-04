@@ -46,9 +46,9 @@ export function ActivePromptsPanel() {
   };
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+    <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-white">Active Prompts</h3>
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Active Prompts</h3>
         <Link
           href="/admin/system-config/prompts"
           className="text-xs px-3 py-1.5 rounded-lg bg-purple-600/20 text-purple-300 hover:bg-purple-600/30"
@@ -76,15 +76,15 @@ export function ActivePromptsPanel() {
           {prompts.map((prompt) => (
             <div
               key={prompt.key}
-              className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+              className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/10 transition-colors"
             >
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0" />
-                  <p className="text-sm font-medium text-white">{prompt.displayName}</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">{prompt.displayName}</p>
                 </div>
                 <div className="mt-1 flex items-center gap-2 text-xs text-slate-400">
-                  <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10">
+                  <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
                     {categoryLabels[prompt.category] || prompt.category}
                   </span>
                   <span>v{prompt.version}</span>
@@ -93,7 +93,7 @@ export function ActivePromptsPanel() {
               </div>
               <Link
                 href={`/admin/system-config/prompts/${prompt.id}`}
-                className="text-xs px-2 py-1 rounded bg-white/10 text-slate-300 hover:bg-white/20 whitespace-nowrap"
+                className="text-xs px-2 py-1 rounded bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/20 whitespace-nowrap"
               >
                 Edit
               </Link>

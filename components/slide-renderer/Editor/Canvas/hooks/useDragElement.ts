@@ -18,9 +18,6 @@ export function useDragElement(
   setElementList: React.Dispatch<React.SetStateAction<PPTElement[]>>,
   setAlignmentLines: React.Dispatch<React.SetStateAction<AlignmentLineProps[]>>,
 ) {
-  const activeElementIdList = useCanvasStore.use.activeElementIdList();
-  const activeGroupElementId = useCanvasStore.use.activeGroupElementId();
-  const canvasScale = useCanvasStore.use.canvasScale();
   const shiftKeyState = useKeyboardStore((state) => state.shiftKeyState);
 
   const viewportRatio = useCanvasStore.use.viewportRatio();
@@ -32,8 +29,18 @@ export function useDragElement(
   const dragElement = useCallback(
     (e: React.MouseEvent | React.TouchEvent, element: PPTElement) => {
       const native = e.nativeEvent;
-      const isTouchEvent = native instanceof TouchEvent;
+      // TouchEvent is not defined on non-touch desktop browsers — guard before instanceof
+      const isTouchEvent = typeof TouchEvent !== 'undefined' && native instanceof TouchEvent;
       if (isTouchEvent && !native.changedTouches?.length) return;
+
+      // Read from store at call time to avoid stale closure when element was just selected
+      // (selectElement calls setActiveElementIdList then immediately calls dragElement —
+      //  the old dragElement closure would still have the previous activeElementIdList value)
+      const {
+        activeElementIdList,
+        activeGroupElementId,
+        canvasScale,
+      } = useCanvasStore.getState();
 
       if (!activeElementIdList.includes(element.id)) return;
 
@@ -55,8 +62,8 @@ export function useDragElement(
       const elOriginHeight = 'height' in element && element.height ? element.height : 0;
       const elOriginRotate = 'rotate' in element && element.rotate ? element.rotate : 0;
 
-      const startPageX = isTouchEvent ? native.changedTouches[0].pageX : native.pageX;
-      const startPageY = isTouchEvent ? native.changedTouches[0].pageY : native.pageY;
+      const startPageX = isTouchEvent ? (native as TouchEvent).changedTouches[0].pageX : (native as MouseEvent).pageX;
+      const startPageY = isTouchEvent ? (native as TouchEvent).changedTouches[0].pageY : (native as MouseEvent).pageY;
 
       let isMisoperation: boolean | null = null;
 
@@ -384,10 +391,9 @@ export function useDragElement(
       }
     },
     [
-      activeElementIdList,
-      activeGroupElementId,
+      // activeElementIdList, activeGroupElementId, canvasScale are read from getState() at call
+      // time to avoid stale closure when an element is selected and dragged in a single gesture
       shiftKeyState,
-      canvasScale,
       elementListRef,
       setElementList,
       setAlignmentLines,

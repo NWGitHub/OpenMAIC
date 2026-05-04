@@ -25,6 +25,7 @@ interface DbUser {
 
 export default function StudentsPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const { pendingStudents, addStudent, removeStudent } = useClassroomWizard();
 
   const [form, setForm] = useState({ name: '', studentId: '', email: '' });
@@ -91,7 +92,7 @@ export default function StudentsPage() {
     >
       <div className="space-y-6">
         <div>
-          <h2 className="text-lg font-semibold text-white">{t('classroomWizard.students.sectionTitle')}</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t('classroomWizard.students.sectionTitle')}</h2>
           <p className="mt-1 text-sm text-slate-400">
             {t('classroomWizard.students.sectionDesc')}
           </p>
@@ -99,7 +100,7 @@ export default function StudentsPage() {
 
         {/* DB search */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-200">
+          <label className="text-sm font-medium text-slate-700 dark:text-slate-200">
             {t('classroomWizard.students.searchLabel')}
           </label>
           <div className="relative">
@@ -109,7 +110,7 @@ export default function StudentsPage() {
               value={dbQuery}
               onChange={(e) => { setDbQuery(e.target.value); void searchDb(e.target.value); }}
               placeholder={t('classroomWizard.students.searchPlaceholder')}
-              className="w-full rounded-lg border border-white/10 bg-white/5 pl-9 pr-3 py-2 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 pl-9 pr-3 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </div>
           {dbLoading && (
@@ -118,7 +119,7 @@ export default function StudentsPage() {
             </div>
           )}
           {dbResults.length > 0 && (
-            <ul className="rounded-lg border border-white/10 bg-slate-800 divide-y divide-white/5 max-h-48 overflow-y-auto">
+            <ul className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 divide-y divide-slate-100 dark:divide-white/5 max-h-48 overflow-y-auto">
               {dbResults.slice(0, 10).map((u) => (
                 <li key={u.id}>
                   <button
@@ -126,7 +127,7 @@ export default function StudentsPage() {
                     onClick={() => handleSelectDbUser(u)}
                     className="w-full px-3 py-2 text-left text-sm hover:bg-white/8 transition-colors"
                   >
-                    <span className="font-medium text-white">{u.name ?? '—'}</span>
+                    <span className="font-medium text-slate-900 dark:text-white">{u.name ?? '—'}</span>
                     <span className="ml-2 text-slate-400 text-xs">{u.email}</span>
                   </button>
                 </li>
@@ -136,7 +137,7 @@ export default function StudentsPage() {
         </div>
 
         {/* Manual add form */}
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-3">
+        <div className="rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-4 space-y-3">
           <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
             {selectedDbUser ? `${t('classroomWizard.students.linkedTo')} ${selectedDbUser.email}` : t('classroomWizard.students.orAddManually')}
           </p>
@@ -150,7 +151,7 @@ export default function StudentsPage() {
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                 placeholder="Full name"
                 maxLength={200}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-1.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <div>
@@ -161,7 +162,7 @@ export default function StudentsPage() {
                 onChange={(e) => setForm((f) => ({ ...f, studentId: e.target.value }))}
                 placeholder="e.g. 2024001"
                 maxLength={50}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-1.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <div>
@@ -172,7 +173,7 @@ export default function StudentsPage() {
                 onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                 placeholder="student@example.com"
                 maxLength={254}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
+                className="w-full rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-1.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
               />
             </div>
           </div>
@@ -190,17 +191,17 @@ export default function StudentsPage() {
         {/* Pending list */}
         {pendingStudents.length > 0 && (
           <div>
-            <p className="mb-2 text-sm font-medium text-slate-300">
+            <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
               {t('classroomWizard.students.pendingCount', { count: String(pendingStudents.length) })}
             </p>
             <ul className="space-y-1.5">
               {pendingStudents.map((s, i) => (
                 <li
                   key={i}
-                  className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm"
+                  className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-3 py-2 text-sm"
                 >
                   <div>
-                    <span className="font-medium text-white">{s.name}</span>
+                    <span className="font-medium text-slate-900 dark:text-white">{s.name}</span>
                     {s.email && <span className="ml-2 text-slate-400 text-xs">{s.email}</span>}
                     {s.dbUserId && (
                       <span className="ml-2 rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] text-emerald-400">

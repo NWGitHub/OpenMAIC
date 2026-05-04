@@ -44,7 +44,7 @@ function MobileNavLink({
     <Link
       href={href}
       onClick={onClick}
-      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 text-sm transition-colors"
+      className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 text-sm transition-colors"
     >
       {icon} {label}
     </Link>
@@ -69,16 +69,16 @@ export function MobileAdminNav({
   return (
     <>
       {/* Mobile top bar */}
-      <header className="md:hidden flex items-center justify-between px-4 py-3 bg-slate-800 border-b border-white/5 sticky top-0 z-40">
+      <header className="md:hidden flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-white/5 sticky top-0 z-40">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center">
             <GraduationCap className="w-3.5 h-3.5 text-white" />
           </div>
-          <span className="text-white font-semibold text-sm">{t('adminNav.mobileTitle')}</span>
+          <span className="text-slate-900 dark:text-white font-semibold text-sm">{t('adminNav.mobileTitle')}</span>
         </div>
         <button
           onClick={() => setOpen(true)}
-          className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+          className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
           aria-label={t('adminNav.openMenu')}
         >
           <Menu className="w-5 h-5" />
@@ -96,24 +96,24 @@ export function MobileAdminNav({
 
       {/* Slide-in drawer */}
       <nav
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-800 border-r border-white/5 flex flex-col transform transition-transform duration-200 ease-in-out md:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-white/5 flex flex-col transform transition-transform duration-200 ease-in-out md:hidden ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
         aria-label="Mobile admin navigation"
       >
-        <div className="p-5 border-b border-white/5 flex items-center justify-between">
+        <div className="p-5 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center flex-shrink-0">
               <GraduationCap className="w-4 h-4 text-white" />
             </div>
             <div>
-              <p className="text-white font-semibold text-sm leading-tight">MU-OpenMAIC</p>
-              <p className="text-slate-400 text-xs">{t('adminNav.panel')}</p>
+              <p className="text-slate-900 dark:text-white font-semibold text-sm leading-tight">MU-OpenMAIC</p>
+              <p className="text-slate-500 dark:text-slate-400 text-xs">{t('adminNav.panel')}</p>
             </div>
           </div>
           <button
             onClick={close}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
             aria-label={t('adminNav.closeMenu')}
           >
             <X className="w-4 h-4" />
@@ -147,13 +147,13 @@ export function MobileAdminNav({
           <div>
             <p className="px-3 pb-1 text-[11px] uppercase tracking-wider text-slate-500">{t('adminNav.account')}</p>
             <div className="px-3 py-2 mb-2">
-              <p className="text-slate-200 text-xs font-medium truncate">{userName}</p>
+              <p className="text-slate-700 dark:text-slate-200 text-xs font-medium truncate">{userName}</p>
               <p className="text-slate-500 text-xs truncate">{userEmail}</p>
             </div>
             <button
               type="button"
               onClick={() => signOut({ callbackUrl: '/auth/signin' })}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 text-sm transition-colors"
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 text-sm transition-colors"
             >
               <LogOut className="w-4 h-4" /> {t('adminNav.signOut')}
             </button>

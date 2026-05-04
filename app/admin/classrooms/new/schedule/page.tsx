@@ -35,12 +35,12 @@ export default function ClassroomWizardSchedulePage() {
       <ValidationSummary errors={errors} />
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="pacingMode" className="text-slate-200">Pacing mode</Label>
+          <Label htmlFor="pacingMode" className="text-slate-700 dark:text-slate-200">Pacing mode</Label>
           <select
             id="pacingMode"
             value={draft.pacingMode}
             onChange={(e) => setDraft({ pacingMode: e.target.value as 'self_paced' | 'scheduled' })}
-            className="h-9 w-full rounded-md border border-white/10 bg-black/20 px-3 text-sm text-white outline-none"
+            className="h-9 w-full rounded-md border border-slate-300 dark:border-white/10 bg-white dark:bg-black/20 px-3 text-sm text-slate-900 dark:text-white outline-none"
           >
             <option value="self_paced">Self paced</option>
             <option value="scheduled">Scheduled</option>
@@ -49,23 +49,23 @@ export default function ClassroomWizardSchedulePage() {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="space-y-1.5">
-            <Label htmlFor="startAt" className="text-slate-200">Start date</Label>
+            <Label htmlFor="startAt" className="text-slate-700 dark:text-slate-200">Start date</Label>
             <input
               id="startAt"
               type="datetime-local"
               value={draft.startAt}
               onChange={(e) => setDraft({ startAt: e.target.value })}
-              className="h-9 w-full rounded-md border border-white/10 bg-black/20 px-3 text-sm text-white outline-none"
+              className="h-9 w-full rounded-md border border-slate-300 dark:border-white/10 bg-white dark:bg-black/20 px-3 text-sm text-slate-900 dark:text-white outline-none"
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="endAt" className="text-slate-200">End date</Label>
+            <Label htmlFor="endAt" className="text-slate-700 dark:text-slate-200">End date</Label>
             <input
               id="endAt"
               type="datetime-local"
               value={draft.endAt}
               onChange={(e) => setDraft({ endAt: e.target.value })}
-              className="h-9 w-full rounded-md border border-white/10 bg-black/20 px-3 text-sm text-white outline-none"
+              className="h-9 w-full rounded-md border border-slate-300 dark:border-white/10 bg-white dark:bg-black/20 px-3 text-sm text-slate-900 dark:text-white outline-none"
             />
           </div>
         </div>

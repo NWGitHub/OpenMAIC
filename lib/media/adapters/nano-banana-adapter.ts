@@ -31,12 +31,20 @@ interface GeminiPart {
   };
 }
 
+interface GeminiCandidate {
+  content?: {
+    parts?: GeminiPart[];
+  };
+  finishReason?: string;
+  safetyRatings?: Array<{ category: string; probability: string }>;
+}
+
 interface GeminiResponse {
-  candidates?: Array<{
-    content?: {
-      parts?: GeminiPart[];
-    };
-  }>;
+  candidates?: GeminiCandidate[];
+  promptFeedback?: {
+    blockReason?: string;
+    safetyRatings?: Array<{ category: string; probability: string }>;
+  };
   error?: {
     code: number;
     message: string;
@@ -46,7 +54,7 @@ interface GeminiResponse {
 
 /**
  * Lightweight connectivity test — validates API key by fetching model info.
- * Uses GET /v1beta/models/{model} which does not trigger generation.
+ * Uses GET /v1beta/models which does not trigger generation.
  */
 export async function testNanoBananaConnectivity(
   config: ImageGenerationConfig,
@@ -80,7 +88,6 @@ export async function testNanoBananaConnectivity(
     return { success: true, message: `Connected to Nano Banana (${model})` };
   }
 
-  // Parse error body for user-friendly message
   const text = await response.text().catch(() => '');
   if (response.status === 400 || response.status === 401 || response.status === 403) {
     return {
@@ -114,7 +121,9 @@ export async function generateWithNanoBanana(
         },
       ],
       generationConfig: {
-        responseModalities: ['IMAGE'],
+        // Both TEXT and IMAGE must be requested — IMAGE-only causes Gemini to
+        // return an empty candidate on most models.
+        responseModalities: ['TEXT', 'IMAGE'],
       },
     }),
   });
@@ -126,21 +135,42 @@ export async function generateWithNanoBanana(
 
   const data: GeminiResponse = await response.json();
 
+  // API-level error object
   if (data.error) {
-    throw new Error(`Gemini error: ${data.error.code} - ${data.error.message}`);
+    throw new Error(`Gemini error ${data.error.code} (${data.error.status}): ${data.error.message}`);
   }
 
-  const parts = data.candidates?.[0]?.content?.parts;
+  // Prompt was blocked before any candidate was produced
+  if (data.promptFeedback?.blockReason) {
+    throw new Error(
+      `Gemini blocked the prompt (${data.promptFeedback.blockReason}). Try rephrasing the image description.`,
+    );
+  }
+
+  const candidate = data.candidates?.[0];
+
+  // Candidate exists but was stopped early (safety, recitation, etc.)
+  if (candidate && !candidate.content) {
+    const reason = candidate.finishReason ?? 'unknown';
+    throw new Error(
+      `Gemini returned no content — finish reason: ${reason}. The prompt may have been filtered.`,
+    );
+  }
+
+  const parts = candidate?.content?.parts;
   if (!parts || parts.length === 0) {
-    throw new Error('Gemini returned empty response');
+    throw new Error(
+      'Gemini returned an empty response. The model or API key may not support image generation, or the prompt was silently filtered.',
+    );
   }
 
   // Find the image part (inlineData with base64)
   const imagePart = parts.find((p) => p.inlineData);
   if (!imagePart?.inlineData) {
-    // Might have returned text only (e.g. if prompt was rejected)
     const textPart = parts.find((p) => p.text);
-    throw new Error(`Gemini did not return an image. Response text: ${textPart?.text || 'none'}`);
+    throw new Error(
+      `Gemini did not return an image. Model text response: "${textPart?.text ?? 'none'}"`,
+    );
   }
 
   return {

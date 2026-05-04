@@ -13,7 +13,7 @@ export interface PendingStudent {
 interface WizardState {
   title: string;
   description: string;
-  language: 'en' | 'zh-CN' | 'th-TH';
+  language: 'en-US' | 'zh-CN' | 'th-TH';
   pendingStudents: PendingStudent[];
   pacingMode: 'self_paced' | 'scheduled';
   startAt: string;
@@ -23,7 +23,7 @@ interface WizardState {
 interface ClassroomWizardContextValue extends WizardState {
   setTitle: (v: string) => void;
   setDescription: (v: string) => void;
-  setLanguage: (v: 'en' | 'zh-CN' | 'th-TH') => void;
+  setLanguage: (v: 'en-US' | 'zh-CN' | 'th-TH') => void;
   addStudent: (s: PendingStudent) => void;
   removeStudent: (index: number) => void;
   setPacingMode: (v: 'self_paced' | 'scheduled') => void;
@@ -35,7 +35,7 @@ interface ClassroomWizardContextValue extends WizardState {
 const defaultState: WizardState = {
   title: '',
   description: '',
-  language: 'en',
+  language: 'en-US',
   pendingStudents: [],
   pacingMode: 'self_paced',
   startAt: '',
@@ -55,7 +55,7 @@ export function ClassroomWizardProvider({ children }: { children: ReactNode }) {
     setState((s) => ({ ...s, description: v }));
   }, []);
 
-  const setLanguage = useCallback((v: 'en' | 'zh-CN' | 'th-TH') => {
+  const setLanguage = useCallback((v: 'en-US' | 'zh-CN' | 'th-TH') => {
     setState((s) => ({ ...s, language: v }));
   }, []);
 

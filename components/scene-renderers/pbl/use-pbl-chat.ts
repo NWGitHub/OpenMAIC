@@ -8,6 +8,7 @@ import { useState, useCallback } from 'react';
 import type { PBLProjectConfig, PBLChatMessage, PBLAgent, PBLIssue } from '@/lib/pbl/types';
 import { getCurrentModelConfig } from '@/lib/utils/model-config';
 import { useI18n } from '@/lib/hooks/use-i18n';
+import { useStageStore } from '@/lib/store/stage';
 import { createLogger } from '@/lib/logger';
 
 const log = createLogger('PBLChat');
@@ -15,12 +16,41 @@ const log = createLogger('PBLChat');
 interface UsePBLChatOptions {
   projectConfig: PBLProjectConfig;
   userRole: string;
+  sceneId: string;
   onConfigUpdate: (config: PBLProjectConfig) => void;
 }
 
-export function usePBLChat({ projectConfig, userRole, onConfigUpdate }: UsePBLChatOptions) {
+async function persistMessage(
+  classroomId: string,
+  sceneId: string,
+  msg: PBLChatMessage,
+  role: 'user' | 'agent',
+) {
+  try {
+    await fetch('/api/pbl-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        classroomId,
+        sceneId,
+        message: {
+          role,
+          agentId: msg.agent_name,
+          agentName: msg.agent_name,
+          content: msg.message,
+          timestamp: msg.timestamp,
+        },
+      }),
+    });
+  } catch {
+    // non-critical
+  }
+}
+
+export function usePBLChat({ projectConfig, userRole, sceneId, onConfigUpdate }: UsePBLChatOptions) {
   const { t } = useI18n();
   const [isLoading, setIsLoading] = useState(false);
+  const classroomId = useStageStore((s) => s.stage?.id ?? '');
 
   const messages = projectConfig.chat.messages;
 
@@ -48,6 +78,7 @@ export function usePBLChat({ projectConfig, userRole, onConfigUpdate }: UsePBLCh
       };
       updatedConfig.chat.messages.push(userMsg);
       onConfigUpdate(updatedConfig);
+      if (classroomId) void persistMessage(classroomId, sceneId, userMsg, 'user');
 
       // Parse @mention to determine target agent, fallback to question agent
       const targetAgent = resolveTargetAgent(text, currentIssue, projectConfig.agents);
@@ -114,6 +145,7 @@ export function usePBLChat({ projectConfig, userRole, onConfigUpdate }: UsePBLCh
             await handleIssueComplete(afterConfig, currentIssue, headers, t);
           }
 
+          if (classroomId) void persistMessage(classroomId, sceneId, agentMsg, 'agent');
           onConfigUpdate(afterConfig);
         }
       } catch (error) {
@@ -122,7 +154,7 @@ export function usePBLChat({ projectConfig, userRole, onConfigUpdate }: UsePBLCh
         setIsLoading(false);
       }
     },
-    [projectConfig, userRole, currentIssue, isLoading, onConfigUpdate, t],
+    [projectConfig, userRole, sceneId, classroomId, currentIssue, isLoading, onConfigUpdate, t],
   );
 
   return { messages, isLoading, sendMessage, currentIssue };

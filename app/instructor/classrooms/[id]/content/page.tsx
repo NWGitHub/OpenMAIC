@@ -153,7 +153,7 @@ export default function InstructorContentPage() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
           {t('instructorClassroomContent.title')} <span className="text-slate-400 text-sm">({scenes.length} {t('instructorClassroomContent.scenesCount')})</span>
         </h2>
         <div className="flex items-center gap-2">
@@ -182,7 +182,7 @@ export default function InstructorContentPage() {
       )}
 
       {scenes.length === 0 ? (
-        <p className="text-sm text-slate-500 py-10 text-center rounded-xl border border-white/10 bg-white/5">
+        <p className="text-sm text-slate-500 py-10 text-center rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5">
           {t('instructorClassroomContent.noScenes')}
         </p>
       ) : (
@@ -190,7 +190,7 @@ export default function InstructorContentPage() {
           {scenes.map((scene, idx) => (
             <li
               key={scene.id}
-              className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 flex items-center gap-3"
+              className="rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 px-4 py-3 flex items-center gap-3"
             >
               <GripVertical className="w-4 h-4 text-slate-500" />
               <span className="w-7 text-center rounded bg-white/8 px-1.5 py-0.5 text-xs text-slate-400">
@@ -198,7 +198,7 @@ export default function InstructorContentPage() {
               </span>
 
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">{scene.title || t('instructorClassroomContent.untitled')}</p>
+                <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{scene.title || t('instructorClassroomContent.untitled')}</p>
                 <p className="text-xs text-slate-500">{scene.type}</p>
               </div>
 
@@ -207,7 +207,7 @@ export default function InstructorContentPage() {
                   type="button"
                   onClick={() => moveScene(idx, -1)}
                   disabled={idx === 0 || savingOrder}
-                  className="rounded border border-white/10 p-1 text-slate-400 hover:text-white disabled:opacity-40 transition-colors"
+                  className="rounded border border-slate-200 dark:border-white/10 p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-40 transition-colors"
                   aria-label={t('instructorClassroomContent.moveUp')}
                 >
                   <ArrowUp className="w-3.5 h-3.5" />
@@ -216,7 +216,7 @@ export default function InstructorContentPage() {
                   type="button"
                   onClick={() => moveScene(idx, 1)}
                   disabled={idx === scenes.length - 1 || savingOrder}
-                  className="rounded border border-white/10 p-1 text-slate-400 hover:text-white disabled:opacity-40 transition-colors"
+                  className="rounded border border-slate-200 dark:border-white/10 p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-40 transition-colors"
                   aria-label={t('instructorClassroomContent.moveDown')}
                 >
                   <ArrowDown className="w-3.5 h-3.5" />

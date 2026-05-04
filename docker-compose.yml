@@ -18,6 +18,8 @@ services:
 
   migrate:
     build: .
+    # Prisma CLI is not in the standalone image — download on demand.
+    # The prisma/ directory (schema + migrations) is baked into the image.
     command: >
       sh -c "npx --yes prisma@5 migrate deploy"
     environment:
@@ -31,19 +33,29 @@ services:
     build: .
     command: node server.js
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:3000"
     env_file:
       - .env.local
     environment:
       DATABASE_URL: postgresql://openmaic:${POSTGRES_PASSWORD:-changeme}@db:5432/openmaic
     volumes:
+      # Persistent local storage for classrooms, media, and audio.
+      # Remove (or switch to STORAGE_BACKEND=s3) for stateless cloud deploys.
+      - openmaic-data:/app/data
       # Optional: mount server-providers.yml for provider config
       # - ./server-providers.yml:/app/server-providers.yml:ro
-      - openmaic-data:/app/data
     depends_on:
       db:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3000/api/health 2>/dev/null | grep -q "\"ok\"" || exit 1']
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
 
 volumes:
   openmaic-data:

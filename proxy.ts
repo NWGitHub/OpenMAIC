@@ -30,8 +30,11 @@ export default auth(async (req) => {
     return NextResponse.next();
   }
 
-  // Redirect unauthenticated users to sign-in
+  // Unauthenticated: API routes get a 401 JSON; page routes redirect to sign-in
   if (!session?.user) {
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const signInUrl = new URL('/auth/signin', req.url);
     signInUrl.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(signInUrl);

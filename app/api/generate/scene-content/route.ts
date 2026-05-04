@@ -66,11 +66,15 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'stageId is required');
     }
 
-    // Ensure outline has language from stageInfo (fallback for older outlines)
+    // Ensure outline has language from stageInfo (fallback for older outlines).
+    // Normalise legacy 'en' → 'en-US' so every downstream prompt receives a
+    // canonical locale string.  Default to 'en-US' rather than 'zh-CN' to
+    // avoid silently overriding the instructor's language choice.
+    const rawLang = rawOutline.language || stageInfo?.language || 'en-US';
+    const normalizedLang = (rawLang === 'en' ? 'en-US' : rawLang) as 'zh-CN' | 'en-US' | 'th-TH';
     const outline: SceneOutline = {
       ...rawOutline,
-      language:
-        rawOutline.language || (stageInfo?.language as 'zh-CN' | 'en-US' | 'th-TH') || 'zh-CN',
+      language: normalizedLang,
     };
 
     // ── Model resolution from request headers ──

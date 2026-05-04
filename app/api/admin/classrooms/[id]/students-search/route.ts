@@ -7,15 +7,18 @@ import { requireRole, userOwnsClassroom } from '@/lib/auth/helpers';
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   let session;
   try {
-    session = await requireRole('INSTRUCTOR');
+    session = await requireRole('INSTRUCTOR', 'ADMIN');
   } catch {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const { id: classroomId } = await params;
-  const owns = await userOwnsClassroom(session.user.id, classroomId);
-  if (!owns) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  const isAdmin = session.user.role === 'ADMIN';
+  if (!isAdmin) {
+    const owns = await userOwnsClassroom(session.user.id, classroomId);
+    if (!owns) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
   }
 
   const q = req.nextUrl.searchParams.get('q')?.trim() ?? '';
